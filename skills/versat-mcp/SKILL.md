@@ -22,7 +22,7 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
 - Crear, duplicar, listar, procesar o inspeccionar facturas: lee [references/facturas.md](references/facturas.md).
 - Crear, actualizar, listar, aplicar, desaplicar o anular recibos/transacciones: lee [references/recibos.md](references/recibos.md).
-- Problemas de token, headers, Azure/Codex HTTP MCP o `GetAccesoMCP`: lee [references/authentication.md](references/authentication.md).
+- Problemas de token, headers, Azure/Codex HTTP MCP o acceso denegado: lee [references/authentication.md](references/authentication.md).
 
 ## Decisiones comunes
 

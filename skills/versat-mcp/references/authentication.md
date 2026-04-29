@@ -31,7 +31,7 @@ Si el cliente pide "variable de ambiente del token", informa solo el nombre de l
 
 `403` con `tipoError="acceso_mcp_denegado"`, `accesoMcp=false` o `debeDetenerse=true`:
 
-- `GetAccesoMCP` devolvio `false`.
+- La validacion de acceso del MCP fue rechazada.
 - Deten la operacion. No consultes ni modifiques datos.
 - Responde claramente: el token o empresa no tiene acceso al MCP de Versat.
 
@@ -39,7 +39,7 @@ Si el cliente pide "variable de ambiente del token", informa solo el nombre de l
 
 - El MCP recibio el Bearer, pero la API rechazo el token o permisos de negocio.
 - Pide al usuario revisar/generar un token Versat valido.
-- Si los logs muestran `tokenLargo` inesperado, el cliente puede estar transformando el token. Prueba `X-Versat-Mcp-Token` para evitar transformaciones del flujo Bearer.
+- Si el cliente transforma el token Bearer, prueba `X-Versat-Mcp-Token` para enviar el token sin alteraciones.
 
 ## Regla para agentes
 

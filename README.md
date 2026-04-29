@@ -1,10 +1,10 @@
 # Versat MCP Skills
 
-Skills para mejorar el uso del servidor MCP de Versat con agentes de IA.
+Skills e instrucciones para que agentes de IA usen mejor el servidor MCP de Versat.
 
-Este repositorio no contiene el servidor MCP ni credenciales. Solo incluye instrucciones operativas para que el agente use mejor las tools expuestas por el MCP: entidades, facturas, recibos, autenticacion, paginacion, errores y flujos de escritura.
+Este repositorio contiene solo material de apoyo para agentes. No contiene el servidor MCP, codigo de backend ni credenciales.
 
-## Contenido
+## Que hay en este repositorio
 
 ```text
 skills/
@@ -17,81 +17,95 @@ skills/
       recibos.md
 ```
 
-## Requisitos
+La skill ayuda al agente a:
 
-- Servidor MCP Versat publicado o ejecutandose localmente.
-- URL HTTP del MCP, por ejemplo `https://mcp-versat.azurewebsites.net/mcp`.
-- Token Versat valido para la API y habilitado para MCP.
+- Entender que tools usar para entidades, facturas y recibos.
+- Resolver ids antes de crear registros.
+- Elegir el tipo correcto de factura cuando el usuario no lo especifica.
+- Consultar detalles sin exigir que el usuario conozca nombres tecnicos.
+- Tratar errores de autenticacion y permisos de forma clara.
+- Evitar escrituras inseguras o incompletas.
 
-No publique tokens en este repositorio ni los incluya en archivos de configuracion versionados.
+## Conceptos basicos
 
-## Configuracion del MCP
+Para usar Versat MCP con un agente se configuran dos cosas:
 
-El servidor MCP puede recibir el token de dos formas.
+- El servidor MCP: la conexion HTTP que permite al agente llamar las tools de Versat.
+- Las Skills: instrucciones para que el agente use esas tools con mejores criterios.
 
-### Opcion recomendada: header propio
+La URL del MCP y el token deben ser entregados por el administrador de Versat o por el equipo responsable de la implantacion.
 
-Use esta opcion cuando el cliente permita configurar headers manuales.
+Ejemplo de URL:
 
-```http
-X-Versat-Mcp-Token: <TOKEN_VERSAT>
+```text
+https://mcp-versat.azurewebsites.net/mcp
 ```
 
-No agregue `Bearer` en este header. Use el valor del token directamente.
+## Configurar el MCP
 
-### Opcion compatible: Authorization Bearer
+Siempre que el cliente permita configurar headers manuales, use esta forma:
 
-Use esta opcion cuando el cliente soporte autenticacion Bearer nativa.
+```text
+Header: X-Versat-Mcp-Token
+Valor: <TOKEN_VERSAT>
+```
 
-```http
+No agregue `Bearer` en este header.
+
+Si el cliente no permite headers manuales pero tiene autenticacion Bearer nativa, use:
+
+```text
 Authorization: Bearer <TOKEN_VERSAT>
 ```
 
-Si el cliente pide "variable de ambiente del bearer token", normalmente espera el nombre de una variable, no el token. En ese caso configure una variable como `VERSAT_MCP_TOKEN` y ponga el token real en el ambiente.
+Si el cliente pide una "variable de ambiente del token", no coloque el token en ese campo. Coloque el nombre de una variable, por ejemplo:
 
-## Instalacion en Codex
+```text
+VERSAT_MCP_TOKEN
+```
 
-Clone este repositorio:
+Y defina esa variable en el ambiente donde el agente ejecuta.
+
+## Instalar las Skills en Codex
+
+1. Clone este repositorio:
 
 ```bash
 git clone https://github.com/Versat-Platform/versat_skills_mcp.git
 ```
 
-Copie la skill al directorio de Skills de Codex:
+2. Copie la skill para el directorio de Skills de Codex:
 
 ```bash
 mkdir -p ~/.codex/skills
 cp -R versat_skills_mcp/skills/versat-mcp ~/.codex/skills/versat-mcp
 ```
 
-Configure el MCP HTTP en Codex:
+3. Reinicie Codex o abra una nueva sesion.
+
+4. Configure el servidor MCP en Codex:
 
 ```text
-Nombre: mcp-versat-prod
+Nombre: versat
+Tipo: HTTP con streaming
 URL: https://mcp-versat.azurewebsites.net/mcp
 Header:
   X-Versat-Mcp-Token: <TOKEN_VERSAT>
 ```
 
-Si prefiere usar variable de ambiente:
-
-```bash
-export VERSAT_MCP_TOKEN='<TOKEN_VERSAT>'
-```
-
-Y en Codex:
+5. Verifique la conexion pidiendo al agente:
 
 ```text
-Variable de ambiente de token del portador: VERSAT_MCP_TOKEN
+Liste as tools do MCP versat
 ```
 
-## Instalacion en Claude Desktop
+## Instalar en Claude Desktop
 
-Claude Desktop no usa Skills de Codex directamente, pero puede aprovechar el contenido de `SKILL.md` como instrucciones del proyecto o del agente.
+Claude Desktop puede usar servidores MCP, pero el soporte exacto para MCP remoto depende de la version instalada.
 
-Para conectar el MCP por HTTP, agregue un servidor MCP remoto si su version de Claude Desktop lo soporta. Si solo soporta procesos locales, use un puente compatible con MCP remoto o ejecute el servidor MCP localmente.
+1. Abra la configuracion de MCP de Claude Desktop.
 
-Configuracion conceptual:
+2. Agregue el servidor Versat con la URL HTTP:
 
 ```json
 {
@@ -106,32 +120,17 @@ Configuracion conceptual:
 }
 ```
 
-Luego agregue el contenido de `skills/versat-mcp/SKILL.md` a las instrucciones del proyecto o del agente.
+3. Si su version de Claude Desktop no acepta MCP remoto por URL, use un puente local compatible con MCP remoto o ejecute el servidor MCP localmente.
 
-## Instalacion en Cursor
+4. Copie el contenido de `skills/versat-mcp/SKILL.md` en las instrucciones del proyecto o en las instrucciones personalizadas del agente.
 
-Cursor puede usar servidores MCP desde su configuracion de MCP. Agregue el servidor remoto con la URL del MCP y el header del token.
+5. Cuando el agente necesite mas detalle, agregue tambien los archivos de `skills/versat-mcp/references/`.
 
-Ejemplo conceptual:
+## Instalar en Cursor
 
-```json
-{
-  "mcpServers": {
-    "versat": {
-      "url": "https://mcp-versat.azurewebsites.net/mcp",
-      "headers": {
-        "X-Versat-Mcp-Token": "<TOKEN_VERSAT>"
-      }
-    }
-  }
-}
-```
+1. Abra la configuracion de MCP de Cursor.
 
-Para la parte de Skills, copie el contenido de `SKILL.md` y las referencias relevantes en las reglas del proyecto, instrucciones personalizadas o memoria del agente.
-
-## Instalacion en Windsurf
-
-Configure el servidor MCP remoto en la configuracion de MCP de Windsurf:
+2. Agregue un servidor MCP remoto:
 
 ```json
 {
@@ -146,11 +145,40 @@ Configure el servidor MCP remoto en la configuracion de MCP de Windsurf:
 }
 ```
 
-Despues agregue el contenido de `skills/versat-mcp/SKILL.md` como reglas/instrucciones del workspace.
+3. Agregue `skills/versat-mcp/SKILL.md` a las reglas del proyecto, instrucciones del agente o memoria del workspace.
 
-## Instalacion en VS Code
+4. Si trabaja frecuentemente con entidades, facturas o recibos, agregue tambien los archivos de `references/`.
 
-Si usa una extension o agente compatible con MCP, registre el servidor HTTP:
+## Instalar en Windsurf
+
+1. Abra la configuracion de MCP de Windsurf.
+
+2. Registre el servidor Versat:
+
+```json
+{
+  "mcpServers": {
+    "versat": {
+      "url": "https://mcp-versat.azurewebsites.net/mcp",
+      "headers": {
+        "X-Versat-Mcp-Token": "<TOKEN_VERSAT>"
+      }
+    }
+  }
+}
+```
+
+3. Copie `skills/versat-mcp/SKILL.md` para las instrucciones del workspace.
+
+4. Use los archivos de `references/` como documentacion adicional del agente.
+
+## Instalar en VS Code
+
+La instalacion en VS Code depende de la extension o agente utilizado. El patron general es:
+
+1. Abra la configuracion MCP de la extension.
+
+2. Agregue el servidor HTTP:
 
 ```json
 {
@@ -165,51 +193,31 @@ Si usa una extension o agente compatible con MCP, registre el servidor HTTP:
 }
 ```
 
-La ubicacion exacta depende de la extension utilizada. Para mejorar el comportamiento del agente, agregue `SKILL.md` como instrucciones del workspace o como archivo de reglas del agente.
+3. Agregue `skills/versat-mcp/SKILL.md` como instrucciones del workspace o reglas del agente.
 
-## Como usar la Skill
+4. Mantenga los archivos de `references/` disponibles para consultas de contexto.
 
-La skill indica al agente como:
+## Como saber si quedo funcionando
 
-- Resolver ids antes de crear registros.
-- Elegir entre facturas financieras, de insumos o de granos.
-- Consultar entidades y detalles sin pedir nombres tecnicos al usuario.
-- Manejar paginacion de Versat, que devuelve registros de antiguo a nuevo.
-- Detenerse correctamente cuando `GetAccesoMCP` deniega acceso.
-- Crear registros en estado `Borrador` cuando el recurso tiene campo `Status`.
-
-## Validacion rapida
-
-Primero valide el token directamente contra la API Versat:
-
-```bash
-curl -i \
-  -H "Authorization: Bearer <TOKEN_VERSAT>" \
-  http://test.versat.com.py:8000/api/Polling/GetAccesoMCP
-```
-
-Resultados esperados:
-
-- `200 true`: token valido y acceso MCP habilitado.
-- `200 false`: token valido, pero sin acceso MCP habilitado.
-- `401`: token invalido, transformado por el cliente o no aceptado por el ambiente.
-
-Luego valide el MCP desde el agente listando tools o ejecutando una consulta simple, por ejemplo `versat_consultar_entidad`.
-
-Si necesita probar el transporte HTTP con `curl`, envie una request JSON-RPC valida al endpoint MCP. La forma exacta puede variar segun el cliente y version del protocolo, por eso la prueba recomendada es desde el cliente MCP real.
-
-Para diagnosticar headers sin exponer tokens, revise los logs del servidor:
+Desde el agente, haga una prueba simple:
 
 ```text
-tokenFuente=x_versat_mcp_token
-tokenLargo=64
+Liste as tools do MCP versat
 ```
 
-El valor exacto de `tokenLargo` puede variar, pero debe coincidir con el token esperado y no con una version transformada por el cliente.
+Despues pruebe una tool de solo lectura:
 
-## Seguridad
+```text
+Consulte os dados da entidade Batman usando o MCP versat
+```
+
+Si el agente lista tools y consigue ejecutar una consulta simple, la instalacion esta lista.
+
+## Buenas practicas
 
 - No suba tokens a Git.
-- Prefiera variables de ambiente o secretos del proveedor.
-- Si usa headers manuales en una UI, confirme que no queden versionados.
-- Revise logs usando hash/tamano del token, nunca el token completo.
+- Use secretos, variables de ambiente o campos seguros del cliente MCP.
+- Instale la skill en el agente que realmente usara el MCP.
+- Mantenga el nombre del servidor MCP simple, por ejemplo `versat`.
+- Cuando actualice esta skill, copie nuevamente la carpeta `skills/versat-mcp`.
+
