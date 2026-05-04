@@ -1,6 +1,6 @@
 # Facturas
 
-Usa estas reglas para listar, inspeccionar, crear, duplicar o procesar facturas en Versat MCP.
+Usa estas reglas para listar, inspeccionar, crear, actualizar, duplicar o procesar facturas en Versat MCP.
 
 ## Seleccion de tipo
 
@@ -17,6 +17,7 @@ Si sigue ambiguo, pregunta si quiere factura `financiera`, de `insumos` o de `gr
 
 - listar: `versat_listar_facturas_financiero`
 - agregar: `versat_agregar_factura_financiero`
+- actualizar: `versat_actualizar_factura_financiero`
 - agregar completa: `versat_agregar_factura_completa_financiero`
 - detalle: `versat_consultar_detalle_factura_financiero`
 - procesar: `versat_procesar_facturas_financiero`
@@ -25,6 +26,7 @@ Si sigue ambiguo, pregunta si quiere factura `financiera`, de `insumos` o de `gr
 
 - listar: `versat_listar_facturas_insumos`
 - agregar: `versat_agregar_factura_insumos`
+- actualizar: `versat_actualizar_factura_insumos`
 - agregar completa: `versat_agregar_factura_completa_insumos`
 - detalle: `versat_consultar_detalle_factura_insumos`
 - procesar: `versat_procesar_facturas_insumos`
@@ -34,6 +36,7 @@ Si sigue ambiguo, pregunta si quiere factura `financiera`, de `insumos` o de `gr
 
 - listar: `versat_listar_facturas_granos`
 - agregar: `versat_agregar_factura_granos`
+- actualizar: `versat_actualizar_factura_granos`
 - agregar completa: `versat_agregar_factura_completa_granos`
 - detalle: `versat_consultar_detalle_factura_granos`
 - procesar: `versat_procesar_facturas_granos`
@@ -69,6 +72,15 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 4. Si hay detalles, prefiere la tool completa.
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
 6. Si la API rechaza, informa el error y pregunta solo por el campo necesario.
+
+## Actualizar factura
+
+1. Identifica el recurso correcto: AF31, AI71 o AG91.
+2. Consulta la factura actual antes de actualizar si el usuario pide cambiar solo un campo.
+3. Usa la tool `versat_actualizar_factura_*` del mismo recurso, pasando `id` y `facturaJson`.
+4. No mezcles recursos: una factura AI71 se actualiza solo con `versat_actualizar_factura_insumos`.
+5. No fuerces `Status=Borrador` en actualización; esa regla aplica solo al alta.
+6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o inválido.
 
 ## Resolucion de IDs
 
