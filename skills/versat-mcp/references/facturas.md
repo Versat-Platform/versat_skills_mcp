@@ -90,6 +90,7 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 - Operacion: `versat_buscar_operaciones_documento`
 - Moneda: `versat_buscar_monedas`
 - Condicion de pago: `versat_buscar_condiciones_pago`
+- Cuenta: `versat_buscar_cuentas`
 - Unidad: `versat_buscar_unidades`
 - Deposito: `versat_buscar_depositos`
 - Timbrado: `versat_buscar_timbrados`

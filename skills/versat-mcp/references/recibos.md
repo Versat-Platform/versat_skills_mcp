@@ -21,10 +21,19 @@ Versat pagina de antiguo a nuevo. Para ultimos recibos:
 
 ## Crear recibo
 
-1. Resuelve unidad, entidad, moneda y zafra si aplica.
+1. Resuelve unidad, entidad, moneda, cuenta y zafra si aplica.
 2. Si faltan campos, llama `versat_agregar_recibo_transaccion` sin JSON.
 3. Usa `versat_agregar_recibo_transaccion_completo` cuando haya detalles.
 4. Informa id creado y detalles creados.
+
+## Resolucion de IDs
+
+- Unidad: `versat_buscar_unidades`
+- Entidad: `versat_listar_entidades`
+- Moneda: `versat_buscar_monedas`
+- Cuenta: `versat_buscar_cuentas`
+- Condicion de pago: `versat_buscar_condiciones_pago`
+- Zafra: `versat_buscar_zafras`
 
 ## Actualizar recibo
 
