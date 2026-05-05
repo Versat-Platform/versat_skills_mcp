@@ -73,6 +73,14 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
 6. Si la API rechaza, informa el error y pregunta solo por el campo necesario.
 
+Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no insertes solo la cabecera si el documento contiene lineas o datos relacionados. Extrae y propone tambien los detalles necesarios:
+
+- Insumos: `Factura_producto` para productos/cantidades/precios; `Factura_cuota` para vencimientos; `Factura_flete` para flete; `Factura_clasificacion` para cuenta, unidad, actividad o centro de costo.
+- Granos: `Factura_producto` para productos/granos; `Factura_remision` para remisiones; `Factura_cuota` para vencimientos; `Factura_flete` para flete; `Factura_clasificacion` para clasificación contable.
+- Financiero: `Factura_clasificacion` para cuenta/clasificación; `Factura_cuota` para vencimientos; `Factura_baja` para bajas; `Factura_retencion` para retenciones; `Factura_flete` para flete.
+
+Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera.
+
 Si el usuario informa `Doc_num` o `Codigo_control_elec` con guiones, puntos o espacios, no pidas que lo corrija. El MCP normaliza esos campos antes de enviar a Versat y conserva solo dígitos.
 
 ## Alta guiada para usuario

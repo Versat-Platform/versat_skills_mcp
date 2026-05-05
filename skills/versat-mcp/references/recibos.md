@@ -26,6 +26,14 @@ Versat pagina de antiguo a nuevo. Para ultimos recibos:
 3. Usa `versat_agregar_recibo_transaccion_completo` cuando haya detalles.
 4. Informa id creado y detalles creados.
 
+Cuando el usuario envie un recibo o comprobante para ser leido desde imagen, PDF o texto, no insertes solo la cabecera si el documento contiene detalles. Extrae y propone tambien:
+
+- `Financ_caja`: movimiento de caja/cuenta, entrada o salida, moneda, condición, cuenta, cheque y valor.
+- `Financ_baja`: baja o cancelación de títulos/flujo de caja, valor baja, descuento o interés.
+- `Financ_factura`: factura/documento financiero vinculado al recibo.
+
+Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La tool inyecta `Financ_id` automáticamente después de crear la cabecera.
+
 ## Resolucion de IDs
 
 - Unidad: `versat_buscar_unidades`
