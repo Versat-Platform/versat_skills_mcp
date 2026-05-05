@@ -73,6 +73,33 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
 6. Si la API rechaza, informa el error y pregunta solo por el campo necesario.
 
+Si el usuario informa `Doc_num` o `Codigo_control_elec` con guiones, puntos o espacios, no pidas que lo corrija. El MCP normaliza esos campos antes de enviar a Versat y conserva solo dígitos.
+
+## Alta guiada para usuario
+
+Cuando el usuario quiera insertar una factura, no le pidas nombres técnicos como `Documento_tipo_id`, `Operacion_doc_id`, `Entidad_id` o `Moneda_id`. Haz preguntas de negocio y resuelve los IDs con tools.
+
+Primero pregunta solo lo esencial:
+
+1. Tipo de factura: financiera, insumos o granos, si todavía no está claro.
+2. Fecha de movimiento y fecha del documento. Si el usuario dice "hoy", usa la fecha actual.
+3. Tipo de documento por nombre, por ejemplo FACTURA, NOTA CREDITO o RECIBO.
+4. Operación por nombre, pero después de resolver el tipo de documento busca operaciones pasando `documentoTipoId`.
+5. Entidad por nombre.
+6. Unidad por nombre.
+7. Moneda por nombre.
+8. Concepto u observación principal.
+9. Número de documento, si el tipo de operación lo requiere o si el usuario lo tiene.
+10. Condición de pago, cuenta financiera, timbrado, ubicación, depósito, zafra o proyecto solo si la API, el contrato de la tool o la operación lo exige.
+
+Para facturas de insumos, pregunta además los productos como una lista simple: producto, cantidad, precio unitario, tributación si aplica y depósito si aplica. El agente debe resolver `Producto_id` con `versat_buscar_productos_insumos`.
+
+Para facturas de granos, pregunta los datos específicos del flujo de granos solo si el contrato o la operación los exige. No inventes contrato, depósito, chapa, chofer ni transportadora.
+
+Para facturas financieras, pregunta cuenta, clasificación o cuotas solo si el usuario pidió esos detalles o la API los exige.
+
+Si faltan muchos datos, no hagas una lista técnica larga. Pide en bloques cortos: primero cabecera, luego detalles, luego datos exigidos por la API tras el primer intento.
+
 ## Actualizar factura
 
 1. Identifica el recurso correcto: AF31, AI71 o AG91.
@@ -81,6 +108,8 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 4. No mezcles recursos: una factura AI71 se actualiza solo con `versat_actualizar_factura_insumos`.
 5. No fuerces `Status=Borrador` en actualización; esa regla aplica solo al alta.
 6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o inválido.
+
+En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados por el MCP para conservar solo dígitos.
 
 ## Resolucion de IDs
 
@@ -102,3 +131,5 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 - Producto de insumo: `versat_buscar_productos_insumos`
 
 Cuando haya varias coincidencias, elige solo si la coincidencia principal es evidente; si no, pregunta.
+
+Para resolver `Operacion_doc_id` de una factura, primero resuelve `Documento_tipo_id` y después llama `versat_buscar_operaciones_documento` informando `documentoTipoId`. La tool debe consultar `OX56` con `detalle=Operacion_doc` y filtrar por `Documento_tipo_id`, para traer solo operaciones compatibles con ese tipo de documento.

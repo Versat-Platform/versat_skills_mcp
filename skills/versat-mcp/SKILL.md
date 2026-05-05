@@ -27,8 +27,12 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 ## Decisiones comunes
 
 - Usuario dice "quiero cadastrar/criar uma fatura" sin tipo: llama `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`; si sigue ambiguo, pregunta si es `financiera`, `insumos` o `granos`.
+- Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
 - Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Consulta una pagina que devuelva `TotalPages`, luego pide la ultima pagina y ordena por `Fecha` e `id` descendente.
 - Usuario informa nombre de entidad: busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Si hay varias coincidencias fuertes, pregunta cual usar.
+- Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
+- Usuario pide datos de la empresa/configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura en el MCP; no intentes crear ni actualizar empresas.
+- Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP carga la empresa OX01 y filtra automáticamente por el modelo de negocio de esa empresa en catálogos compatibles como cuentas, tributación y operaciones.
 - Usuario pide detalles de una factura o recibo por id: usa la tool de detalle del mismo recurso y filtra por `Factura_id` o `Financ_id`.
 - Usuario pide crear cabecera mas detalles: usa la tool completa/orquestadora del recurso cuando exista; evita crear manualmente cabecera y detalles separados.
 
