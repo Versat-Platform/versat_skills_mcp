@@ -31,7 +31,7 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Consulta una pagina que devuelva `TotalPages`, luego pide la ultima pagina y ordena por `Fecha` e `id` descendente.
 - Usuario informa nombre de entidad: busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Si hay varias coincidencias fuertes, pregunta cual usar.
 - Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
-- Usuario pide datos de la empresa/configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura en el MCP; no intentes crear ni actualizar empresas.
+- Usuario pide datos de la empresa/configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura y el MCP filtra siempre por el `Empresa_id` autorizado por `GetAccesoMCP`; no intentes crear ni actualizar empresas.
 - Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP usa `Empresa_id` y `Modelo_id` devueltos por `GetAccesoMCP` para filtrar automáticamente catálogos compatibles como cuentas, tributación y operaciones.
 - Usuario pide detalles de una factura o recibo por id: usa la tool de detalle del mismo recurso y filtra por `Factura_id` o `Financ_id`.
 - Usuario pide crear cabecera mas detalles: usa la tool completa/orquestadora del recurso cuando exista; evita crear manualmente cabecera y detalles separados.
