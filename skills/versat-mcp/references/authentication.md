@@ -31,7 +31,7 @@ Si el cliente pide "variable de ambiente del token", informa solo el nombre de l
 
 `403` con `tipoError="acceso_mcp_denegado"`, `accesoMcp=false` o `debeDetenerse=true`:
 
-- La validacion de acceso del MCP fue rechazada.
+- `GetAccesoMCP` devolvio `AcessoMCP=false` o una validacion equivalente rechazada.
 - Deten la operacion. No consultes ni modifiques datos.
 - Responde claramente: el token o empresa no tiene acceso al MCP de Versat.
 
