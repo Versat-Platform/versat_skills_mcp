@@ -140,4 +140,6 @@ En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados p
 
 Cuando haya varias coincidencias, elige solo si la coincidencia principal es evidente; si no, pregunta.
 
-Para resolver `Operacion_doc_id` de una factura, primero resuelve `Documento_tipo_id` y después llama `versat_buscar_operaciones_documento` informando `documentoTipoId`. La tool debe consultar `OX56` con `detalle=Operacion_doc` y filtrar por `Documento_tipo_id`, para traer solo operaciones compatibles con ese tipo de documento.
+Para resolver la operación de una factura, primero resuelve el tipo de documento y después llama `versat_buscar_operaciones_documento` informando `documentoTipoId` y `tipoFactura` (`AI71`, `AG91` o `AF31`). Usa el id retornado por la tool como `Operacion_doc_id` en el JSON, pero al responder al usuario muestra el nombre amigable de la operación, no el campo técnico.
+
+No digas al usuario “tipoFactura=AI71” ni “campoTipoFactura=Factura_insumos_sn”. Traduce esa validación como “operación habilitada para facturas de insumos”, “operación habilitada para facturas de granos” o “operación habilitada para facturas financieras”.

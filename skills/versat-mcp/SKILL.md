@@ -17,6 +17,14 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
 
+## Respuestas al usuario
+
+- Responde siempre con nombres de negocio y nombres amigables. Usa campos `*_txt`, `Descripcion_cb`, `Nombre`, `Doc_num`, fechas y valores entendibles antes que nombres técnicos.
+- No muestres campos técnicos internos como `tipoFactura`, `campoTipoFactura`, `Factura_insumos_sn`, `Factura_granos_sn`, `Factura_financiero_sn`, `Operacion_doc_id`, `Documento_tipo_id`, `Entidad_id`, `Moneda_id`, `Status_hd`, `descripcion_hd_cb`, `Creacion_hd` o `Ult_mod_hd`, salvo que el usuario pida detalles técnicos.
+- Si necesitas mencionar una validación técnica, tradúcela a lenguaje de negocio. Ejemplo: en vez de “tipoFactura=AI71 y campoTipoFactura=Factura_insumos_sn”, responde “la operación fue validada como habilitada para facturas de insumos”.
+- Cuando muestres un id por auditoría o confirmación, acompáñalo con el nombre amigable. Ejemplo: “Operación: COMPRAS IMPORTACION (id 1381)”.
+- Si la tool devuelve datos técnicos junto con datos de negocio, resume primero lo relevante para el usuario y ofrece mostrar el detalle técnico solo si lo pide.
+
 ## Ruteo de intencion
 
 - Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
