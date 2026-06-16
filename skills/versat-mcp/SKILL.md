@@ -1,6 +1,6 @@
 ---
 name: versat-mcp
-description: Usar cuando se trabaja con el servidor MCP Versat: consultar o crear facturas, recibos, entidades, detalles, resolver ids de catalogos, diagnosticar autenticacion, manejar errores de API y operar tools MCP Versat de forma segura y eficiente.
+description: "Usar cuando se trabaja con el servidor MCP Versat: consultar o crear facturas, recibos, entidades, detalles, resolver ids de catalogos, diagnosticar autenticacion, manejar errores de API y operar tools MCP Versat de forma segura y eficiente."
 ---
 
 # Versat MCP
@@ -30,14 +30,14 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
 - Crear, duplicar, listar, procesar o inspeccionar facturas: lee [references/facturas.md](references/facturas.md).
 - Crear, actualizar, listar, aplicar, desaplicar o anular recibos/transacciones: lee [references/recibos.md](references/recibos.md).
-- Problemas de token, headers, Azure/Codex HTTP MCP o acceso denegado: lee [references/authentication.md](references/authentication.md).
+- Problemas de token, headers, Azure/Codex HTTP MCP o `GetAccesoMCP`: lee [references/authentication.md](references/authentication.md).
 
 ## Decisiones comunes
 
 - Usuario dice "quiero cadastrar/criar uma fatura" sin tipo: llama `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`; si sigue ambiguo, pregunta si es `financiera`, `insumos` o `granos`.
 - Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
-- Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Consulta una pagina que devuelva `TotalPages`, luego pide la ultima pagina y ordena por `Fecha` e `id` descendente.
-- Usuario informa nombre de entidad: busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Si hay varias coincidencias fuertes, pregunta cual usar.
+- Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Usa `pagina=0` solo para obtener `infoPaginacion.totalPages`, luego pide `totalPages - 1` como ultima pagina y ordena por `Fecha` e `id` descendente.
+- Usuario informa nombre de entidad: lee `references/entidades.md`, busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Normaliza mentalmente espacios, puntuacion y abreviaturas como `S.A.` antes de decidir que no existe. Si hay varias coincidencias fuertes, pregunta cual usar.
 - Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
 - Usuario pide “mi empresa”, datos de la empresa o configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura; el MCP usa el token y el `Empresa_id` autorizado por `GetAccesoMCP` como contexto, no como búsqueda libre por nombre.
 - Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP usa `Empresa_id` y `Modelo_id` devueltos por `GetAccesoMCP` para filtrar catálogos compatibles como cuentas, tributación y operaciones sin depender de que la API acepte `Modelo_id` como filtro remoto.

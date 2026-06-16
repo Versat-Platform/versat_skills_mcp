@@ -2,6 +2,14 @@
 
 Usa estas reglas para clientes, proveedores, contactos, direcciones, timbrados, codeudores y otros detalles de BA31.
 
+## Indice
+
+- [Tools](#tools)
+- [Patron rapido](#patron-rapido)
+- [Busqueda por nombre](#busqueda-por-nombre)
+- [Crear o actualizar entidad](#crear-o-actualizar-entidad)
+- [Detalles tecnicos](#detalles-tecnicos)
+
 ## Tools
 
 - `versat_consultar_entidad`: primera opcion para preguntas de negocio sobre una entidad.
@@ -16,16 +24,22 @@ Usa estas reglas para clientes, proveedores, contactos, direcciones, timbrados, 
 
 ## Patron rapido
 
-Para "dados da entidade X":
+Para "dados da entidade X", primero busca candidatos:
 
 ```json
-{"consulta":"resumen","filtroCampo":"Descripcion_cb","filtroValor":"X","limit":1}
+{"filtroCampo":"Descripcion_cb","filtroValor":"X","limit":10}
+```
+
+Si la coincidencia principal es clara y no hay ambiguedad razonable, consulta el aspecto pedido:
+
+```json
+{"consulta":"resumen","filtroCampo":"Descripcion_cb","filtroValor":"X","limit":10}
 ```
 
 Para direccion/contactos/timbrados/codeudores:
 
 ```json
-{"consulta":"contactos","filtroCampo":"Descripcion_cb","filtroValor":"Diego Silva","limit":1}
+{"consulta":"contactos","filtroCampo":"Descripcion_cb","filtroValor":"Diego Silva","limit":10}
 ```
 
 Cambia `consulta` segun la necesidad:
@@ -54,6 +68,30 @@ Usa `Descripcion_cb` como campo principal:
 Si el usuario pide "liste todas", trae suficientes resultados para responder, pero evita cargas grandes sin necesidad. Si hay muchas coincidencias, resume y ofrece continuar.
 
 Los nombres pueden estar invertidos o escritos con pequenas diferencias. Ejemplo: el usuario puede pedir `MATILDE RUIZ DIAZ ALCARAZ` y Versat puede tener `ALCARAZ, MATILDE RUIZ DIAS`. Usa igualmente `Descripcion_cb`; el MCP intenta variaciones y similitud de tokens antes de devolver "no encontrado".
+
+Antes de concluir que no existe una entidad, aplica esta estrategia:
+
+1. Busca primero el texto informado por el usuario con `Descripcion_cb` y un `limit` razonable.
+2. Si no hay resultado o hay muchas coincidencias debiles, repite con el termino distintivo mas fuerte. Ejemplo: de `GIGANET S.A.` usa tambien `GIGANET`; de `LA SEMILLA - ESTANCIA` usa tambien `LA SEMILLA` y `ESTANCIA`.
+3. Ignora diferencias de mayusculas, acentos, puntos, comas, guiones y espacios dobles al comparar candidatos.
+4. Trata abreviaturas societarias como equivalentes: `S.A.`, `SA`, `SOCIEDAD ANONIMA`, `SOCIEDAD ANÓNIMA` y `SOCIEDADE ANONIMA`.
+5. Para personas, prueba orden normal e invertido: `Nombre Apellido`, `Apellido, Nombre` y `Apellido Nombre`.
+6. Si aparece una coincidencia clara por tokens significativos, usa esa entidad; si aparecen varias razonables, muestra opciones con nombre y documento si existe, y pide confirmacion.
+
+Cuando `versat_listar_entidades` devuelva busqueda flexible, usa estos campos para decidir:
+
+- `coincidenciaPrincipal`: candidato mejor ranqueado por el MCP.
+- `coincidencias`: lista de candidatos para comparar si hay ambiguedad.
+- `totalCoincidencias`: cantidad de candidatos encontrados.
+- `criterioBusqueda="nombre_flexible"`: indica que el MCP ya intento variaciones de nombre, separadores, espacios y tokens.
+
+Elige directamente solo cuando `coincidenciaPrincipal` sea claramente la entidad pedida. Si dos o mas candidatos tienen nombres parecidos o documentos distintos, pregunta cual usar antes de consultar detalles sensibles o escribir.
+
+Ejemplos de busqueda flexible:
+
+- Usuario: `GIGANET S.A.`; candidato valido: `GIGANET SOCIEDADE ANONIMA`.
+- Usuario: `LA SEMILLA ESTANCIA`; candidato valido: `LA SEMILLA -  ESTANCIA`.
+- Usuario: `MATILDE RUIZ DIAZ ALCARAZ`; candidato valido: `ALCARAZ, MATILDE RUIZ DIAS`.
 
 Si hay multiples coincidencias para una accion que exige una entidad unica, pregunta cual usar antes de escribir o consultar detalles sensibles.
 

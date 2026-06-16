@@ -2,6 +2,17 @@
 
 Usa estas reglas para listar, inspeccionar, crear, actualizar, duplicar o procesar facturas en Versat MCP.
 
+## Indice
+
+- [Seleccion de tipo](#seleccion-de-tipo)
+- [Mapa rapido](#mapa-rapido)
+- [Registros recientes](#registros-recientes)
+- [Consultar detalles](#consultar-detalles)
+- [Crear o duplicar factura](#crear-o-duplicar-factura)
+- [Alta guiada para usuario](#alta-guiada-para-usuario)
+- [Actualizar factura](#actualizar-factura)
+- [Resolucion de IDs](#resolucion-de-ids)
+
 ## Seleccion de tipo
 
 Si el usuario dice solo "crear/cadastrar una factura", no adivines. Llama:
@@ -47,10 +58,11 @@ Versat pagina de antiguo a nuevo. No trates `pagina=0` como reciente.
 
 Flujo recomendado:
 
-1. Consulta con `pagina=1` y pocos registros para obtener `infoPaginacion.TotalPages`.
-2. Consulta la ultima pagina (`TotalPages`) con un tamano suficiente.
-3. Ordena items por `Fecha`, `Fecha_doc`, `Creacion_hd` o `id` descendente segun los campos disponibles.
-4. Devuelve la cantidad pedida.
+1. Consulta con `pagina=0` y pocos registros para obtener `infoPaginacion.totalPages`.
+2. Calcula la ultima pagina como `max(infoPaginacion.totalPages - 1, 0)`.
+3. Consulta esa ultima pagina con un tamano suficiente.
+4. Ordena items por `Fecha`, `Fecha_doc`, `Creacion_hd` o `id` descendente segun los campos disponibles.
+5. Devuelve la cantidad pedida.
 
 Si la tool no devuelve paginacion, ordena los items recibidos por fecha/id antes de responder.
 
@@ -93,7 +105,7 @@ Primero pregunta solo lo esencial:
 2. Fecha de movimiento y fecha del documento. Si el usuario dice "hoy", usa la fecha actual.
 3. Tipo de documento por nombre, por ejemplo FACTURA, NOTA CREDITO o RECIBO.
 4. Operación por nombre, pero después de resolver el tipo de documento busca operaciones pasando `documentoTipoId`.
-5. Entidad por nombre.
+5. Entidad por nombre, aplicando la estrategia de busqueda flexible de `references/entidades.md`.
 6. Unidad por nombre.
 7. Moneda por nombre.
 8. Concepto u observación principal.
@@ -121,7 +133,7 @@ En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados p
 
 ## Resolucion de IDs
 
-- Entidad: `versat_listar_entidades`
+- Entidad: lee `references/entidades.md` y usa `versat_listar_entidades` con `Descripcion_cb`; no descartes coincidencias por espacios, puntuacion, orden de nombres o abreviaturas como `S.A.`.
 - Direccion de entidad: `versat_consultar_entidad` con `consulta="direccion"`
 - Tipo de documento: `versat_buscar_tipos_documento`
 - Operacion: `versat_buscar_operaciones_documento`

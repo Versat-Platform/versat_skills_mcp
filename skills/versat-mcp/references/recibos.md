@@ -15,13 +15,14 @@
 
 Versat pagina de antiguo a nuevo. Para ultimos recibos:
 
-1. Consulta una pagina pequena para obtener `TotalPages`.
-2. Consulta la ultima pagina.
-3. Ordena por `Fecha`, `Fecha_doc` e `id` descendente.
+1. Consulta `pagina=0` con pocos registros para obtener `infoPaginacion.totalPages`.
+2. Calcula la ultima pagina como `max(infoPaginacion.totalPages - 1, 0)`.
+3. Consulta esa ultima pagina.
+4. Ordena por `Fecha`, `Fecha_doc` e `id` descendente.
 
 ## Crear recibo
 
-1. Resuelve unidad, entidad, moneda, cuenta y zafra si aplica.
+1. Resuelve unidad, entidad, moneda, cuenta y zafra si aplica. Para entidad, aplica la estrategia de busqueda flexible de `references/entidades.md`.
 2. Si faltan campos, llama `versat_agregar_recibo_transaccion` sin JSON.
 3. Usa `versat_agregar_recibo_transaccion_completo` cuando haya detalles.
 4. Informa id creado y detalles creados.
@@ -37,7 +38,7 @@ Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La
 ## Resolucion de IDs
 
 - Unidad: `versat_buscar_unidades`
-- Entidad: `versat_listar_entidades`
+- Entidad: lee `references/entidades.md` y usa `versat_listar_entidades` con `Descripcion_cb`; no descartes coincidencias por espacios, puntuacion, orden de nombres o abreviaturas como `S.A.`.
 - Moneda: `versat_buscar_monedas`
 - Cuenta: `versat_buscar_cuentas`
 - Condicion de pago: `versat_buscar_condiciones_pago`
