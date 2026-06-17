@@ -316,12 +316,3 @@ No uses pagina=0 como registros recientes.
 Crea documentos en borrador y procesa aplicar/desaplicar/anular con tools especificas.
 No expongas tokens, headers, StackTrace ni campos tecnicos innecesarios.
 ```
-
-## Buenas practicas
-
-- No suba tokens a Git.
-- Use secretos, variables de ambiente o campos seguros del cliente MCP.
-- Instale la skill en el agente que realmente usara el MCP.
-- Mantenga el nombre del servidor MCP simple, por ejemplo `versat`.
-- Cuando actualice esta skill, copie nuevamente la carpeta `skills/versat-mcp` y reinicie el agente si no detecta cambios.
-- Pruebe primero con una consulta de solo lectura antes de pedir escrituras.
