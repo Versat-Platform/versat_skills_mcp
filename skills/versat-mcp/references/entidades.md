@@ -9,6 +9,7 @@ Usa estas reglas para clientes, proveedores, contactos, direcciones, timbrados, 
 - [Busqueda por nombre](#busqueda-por-nombre)
 - [Crear o actualizar entidad](#crear-o-actualizar-entidad)
 - [Detalles tecnicos](#detalles-tecnicos)
+- [Errores y ambiguedad](#errores-y-ambiguedad)
 
 ## Tools
 
@@ -57,6 +58,15 @@ Cambia `consulta` segun la necesidad:
 - `regimen_especial`
 - `balance`
 
+Flujo seguro para agentes:
+
+1. Determina si el usuario quiere consultar, crear, actualizar o agregar un detalle.
+2. Si hay nombre de entidad, busca candidatos antes de consultar detalles o escribir.
+3. Si hay una unica coincidencia clara, continua con esa entidad.
+4. Si hay varias coincidencias razonables, muestra opciones y pide confirmacion.
+5. Si no hay coincidencias, repite con terminos distintivos antes de decir que no se encontro.
+6. Para escribir, usa el `id` de la entidad confirmada y no el texto escrito por el usuario.
+
 ## Busqueda por nombre
 
 Usa `Descripcion_cb` como campo principal:
@@ -95,6 +105,14 @@ Ejemplos de busqueda flexible:
 
 Si hay multiples coincidencias para una accion que exige una entidad unica, pregunta cual usar antes de escribir o consultar detalles sensibles.
 
+Pregunta de confirmacion recomendada:
+
+```text
+Encontré varias entidades posibles. ¿Cuál debo usar?
+1. Nombre - documento si existe - id
+2. Nombre - documento si existe - id
+```
+
 ## Crear o actualizar entidad
 
 Para crear una entidad:
@@ -106,11 +124,19 @@ Para crear una entidad:
 5. Envia `entidadJson` con los nombres exactos de campos BA31.
 6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o invalido.
 
+No crees entidad si:
+
+- No sabes si el documento debe ser RUC o CI.
+- El usuario dio un nombre que coincide con una entidad existente y no confirmo que quiere crear una nueva.
+- Faltan campos obligatorios del contrato de la tool.
+- El `Ruc_id` requerido no fue resuelto por `versat_buscar_rucs`.
+
 Para actualizar:
 
 1. Busca o consulta la entidad actual para confirmar el `id`.
 2. Usa `versat_actualizar_entidad` con `id` y `entidadJson`.
 3. No cambies campos no solicitados si no tienes el registro base.
+4. Si el cambio puede afectar datos sensibles, resume el cambio y pide confirmacion antes de ejecutar.
 
 ## Detalles tecnicos
 
@@ -140,3 +166,11 @@ Detalles conocidos:
 - `Entidad_clt`
 - `Entidad_reg_especial`
 - `Entidad_balance`
+
+## Errores y ambiguedad
+
+- Si la tool devuelve `reintentar=true`, espera y reintenta una vez; no digas que la entidad no existe.
+- Si la API devuelve validacion de campo obligatorio, pregunta solo ese campo.
+- Si una busqueda devuelve cero resultados con nombre largo, repite con el apellido, razon social principal o palabra mas distintiva.
+- Si el usuario pide datos sensibles de una entidad ambigua, no muestres detalles de candidatos; pide elegir primero.
+- Si el usuario pide "todos", limita la respuesta inicial y ofrece continuar para evitar respuestas enormes.

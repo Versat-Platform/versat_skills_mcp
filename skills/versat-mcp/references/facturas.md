@@ -11,7 +11,9 @@ Usa estas reglas para listar, inspeccionar, crear, actualizar, duplicar o proces
 - [Crear o duplicar factura](#crear-o-duplicar-factura)
 - [Alta guiada para usuario](#alta-guiada-para-usuario)
 - [Actualizar factura](#actualizar-factura)
+- [Procesar factura](#procesar-factura)
 - [Resolucion de IDs](#resolucion-de-ids)
+- [Errores y recuperacion](#errores-y-recuperacion)
 
 ## Seleccion de tipo
 
@@ -21,6 +23,12 @@ Si el usuario dice solo "crear/cadastrar una factura", no adivines. Llama:
 - o `versat_listar_tipos_factura`
 
 Si sigue ambiguo, pregunta si quiere factura `financiera`, de `insumos` o de `granos`.
+
+No uses palabras sueltas como unica evidencia. Ejemplos:
+
+- "producto", "insumo", "deposito" suelen indicar insumos, pero confirma si no es claro.
+- "granos", "silo", "remision de granos" suele indicar granos.
+- "cuenta", "cobro", "pago", "financiero" suele indicar financiero.
 
 ## Mapa rapido
 
@@ -85,6 +93,16 @@ Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y 
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
 6. Si la API rechaza, informa el error y pregunta solo por el campo necesario.
 
+Checklist minimo antes de crear:
+
+- Tipo de factura definido: financiera, insumos o granos.
+- Tipo de documento resuelto.
+- Operacion resuelta para el tipo de factura y empresa.
+- Entidad unica confirmada.
+- Unidad, moneda y fecha definidas.
+- Numero de documento definido cuando aplique.
+- Detalles preparados cuando el usuario envio lineas, cuotas, productos, remisiones, fletes, retenciones o clasificaciones.
+
 Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no insertes solo la cabecera si el documento contiene lineas o datos relacionados. Extrae y propone tambien los detalles necesarios:
 
 - Insumos: `Factura_producto` para productos/cantidades/precios; `Factura_cuota` para vencimientos; `Factura_flete` para flete; `Factura_clasificacion` para cuenta, unidad, actividad o centro de costo.
@@ -120,6 +138,12 @@ Para facturas financieras, pregunta cuenta, clasificación o cuotas solo si el u
 
 Si faltan muchos datos, no hagas una lista técnica larga. Pide en bloques cortos: primero cabecera, luego detalles, luego datos exigidos por la API tras el primer intento.
 
+Ejemplo de pregunta por bloque:
+
+```text
+Para crear la factura necesito confirmar estos datos de cabecera: tipo de factura, fecha, entidad, moneda y número de documento. Después resolvemos productos/cuotas si corresponde.
+```
+
 ## Actualizar factura
 
 1. Identifica el recurso correcto: AF31, AI71 o AG91.
@@ -130,6 +154,22 @@ Si faltan muchos datos, no hagas una lista técnica larga. Pide en bloques corto
 6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o inválido.
 
 En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados por el MCP para conservar solo dígitos.
+
+## Procesar factura
+
+Usa la tool `versat_procesar_facturas_*` del mismo recurso:
+
+- `Aplicar`
+- `Desaplicar`
+- `Anular`
+
+Reglas:
+
+1. Confirma el recurso correcto antes de procesar.
+2. Usa ids de facturas existentes, no numeros de documento sin resolver.
+3. Para `Desaplicar` o `Anular`, incluye motivo si el usuario lo dio; si el motivo es obligatorio y falta, pregunta.
+4. No cambies `Status` manualmente con update para aplicar, desaplicar o anular.
+5. Si hay varios documentos con el mismo numero, pide confirmacion.
 
 ## Resolucion de IDs
 
@@ -155,3 +195,12 @@ Cuando haya varias coincidencias, elige solo si la coincidencia principal es evi
 Para resolver la operación de una factura, primero resuelve el tipo de documento y después llama `versat_buscar_operaciones_documento` informando `documentoTipoId` y `tipoFactura` (`AI71`, `AG91` o `AF31`). Usa el id retornado por la tool como `Operacion_doc_id` en el JSON, pero al responder al usuario muestra el nombre amigable de la operación, no el campo técnico.
 
 No digas al usuario “tipoFactura=AI71” ni “campoTipoFactura=Factura_insumos_sn”. Traduce esa validación como “operación habilitada para facturas de insumos”, “operación habilitada para facturas de granos” o “operación habilitada para facturas financieras”.
+
+## Errores y recuperacion
+
+- `reintentar=true`: informa falla temporal, espera y reintenta la misma operacion si el usuario desea continuar.
+- Error por campo obligatorio: pregunta solo ese campo y vuelve a intentar con el JSON corregido.
+- Error por operacion no habilitada: busca otra operacion valida para el mismo tipo de documento y tipo de factura; no inventes `Operacion_doc_id`.
+- Error por entidad ambigua: vuelve a `references/entidades.md` y pide confirmacion.
+- Exito parcial en tool completa: informa cabecera creada, detalles creados y detalle que fallo; no repitas todo sin verificar lo que ya fue creado.
+- Respuesta vacia al buscar recientes: revisa paginacion antes de decir que no hay facturas.

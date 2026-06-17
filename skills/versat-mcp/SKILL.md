@@ -1,11 +1,21 @@
 ---
 name: versat-mcp
-description: "Usar cuando se trabaja con el servidor MCP Versat: consultar o crear facturas, recibos, entidades, detalles, resolver ids de catalogos, diagnosticar autenticacion, manejar errores de API y operar tools MCP Versat de forma segura y eficiente."
+description: "Usar cuando se trabaja con el servidor MCP Versat: consultar, listar, crear, actualizar o procesar facturas, recibos, entidades y detalles; resolver ids de catalogos; diagnosticar autenticacion, permisos, errores temporales de API y respuestas de tools; guiar agentes para usar exclusivamente tools MCP Versat sin llamar directo a la API."
 ---
 
 # Versat MCP
 
-Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de negocio de Versat.
+Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de negocio de Versat. Si dudas entre usar esta skill o razonar desde cero, usa esta skill.
+
+## Algoritmo obligatorio
+
+1. Identifica la intencion: consultar, listar, crear, actualizar, procesar, resolver catalogo, diagnosticar acceso o explicar un error.
+2. Lee la referencia indicada en [Ruteo de intencion](#ruteo-de-intencion) antes de llamar tools de ese dominio.
+3. Usa solo tools MCP Versat para datos de negocio. No llames directo a la API Versat.
+4. Despues de cada tool, evalua el resultado en este orden: bloqueo de acceso, error temporal reintentable, error de validacion, ambiguedad, datos insuficientes, exito.
+5. Si faltan datos obligatorios, pregunta al usuario solo por esos datos. No inventes, no adivines ids y no completes con valores plausibles.
+6. Antes de escribir, confirma que recurso, entidad, catalogos, fechas, moneda, unidad, operacion y detalles obligatorios fueron resueltos o preguntados.
+7. Al responder, muestra primero el resultado de negocio y deja los campos tecnicos fuera salvo que el usuario los pida.
 
 ## Reglas de ejecucion rapida
 
@@ -14,9 +24,18 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
 - Si una tool devuelve `reintentar=true` o `tipoError="api_versat_error_temporal"`, explica al usuario que la API Versat tuvo una falla temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
-- Si una tool devuelve error de API, muestra el `mensaje`, `errorApi` o `cuerpo` relevante y pregunta solo por el dato faltante o invalido.
+- Si una tool devuelve error de API no temporal, muestra el `mensaje` de negocio disponible y pregunta solo por el dato faltante o invalido. No muestres `StackTrace`, `ExceptionType`, headers, tokens ni texto tecnico interno.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
+
+## Interpretacion de resultados
+
+- `EsExitoso=true`: resume datos de negocio. Si hay muchos campos, muestra los utiles y ofrece detalle.
+- `debeDetenerse=true` o `accesoMcp=false`: no sigas. Explica bloqueo de acceso MCP.
+- `reintentar=true`: informa falla temporal. No digas que no hay datos. Reintenta solo despues de esperar `retryAfterSegundos` o unos segundos.
+- `CodigoEstado=400` o mensaje de validacion: corrige el JSON o pregunta el dato faltante. No repitas la misma llamada sin cambiar nada.
+- Multiples coincidencias razonables: presenta 2 a 5 opciones con nombre y documento si existe; pide confirmacion antes de consultar detalles sensibles o escribir.
+- Respuesta vacia: di que no se encontraron datos con ese criterio y ofrece ampliar busqueda; no concluyas que el registro no existe si solo usaste un filtro estrecho.
 
 ## Respuestas al usuario
 
@@ -35,6 +54,7 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 
 ## Decisiones comunes
 
+- Usuario pide algo ambiguo: pregunta una sola aclaracion concreta o usa una tool de sugerencia/listado si existe.
 - Usuario dice "quiero cadastrar/criar uma fatura" sin tipo: llama `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`; si sigue ambiguo, pregunta si es `financiera`, `insumos` o `granos`.
 - Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
 - Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Usa `pagina=0` solo para obtener `infoPaginacion.totalPages`, luego pide `totalPages - 1` como ultima pagina y ordena por `Fecha` e `id` descendente.
@@ -54,6 +74,8 @@ Antes de escribir:
 - Resuelve todas las foreign keys obligatorias con tools de catalogo.
 - Construye JSON con nombres exactos de campos Versat.
 - Para registros con `Status`, deja que el MCP fuerce `Borrador`; no intentes crear documentos como `Aplicado` o `Anulado`.
+- Si el usuario mando imagen/PDF/texto con cabecera y lineas, usa la tool completa del recurso cuando exista.
+- Si hay duda entre dos ids o dos operaciones, pregunta antes de escribir.
 
 Despues de escribir:
 
@@ -61,3 +83,12 @@ Despues de escribir:
 - Si hubo exito parcial, informa cabecera creada, detalles creados y etapa que fallo.
 - Valida consultando el registro o detalle creado cuando sea util y barato.
 - No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la API o si la tool marcó la respuesta como temporal con `reintentar=true`.
+
+## Prohibiciones criticas
+
+- No llamar la API REST de Versat directamente para datos de negocio.
+- No pedir ids tecnicos al usuario si existe una tool para buscarlos.
+- No usar `pagina=0` como sinonimo de ultimo o reciente.
+- No crear documentos como `Aplicado` o `Anulado`; crear en borrador y procesar con tool especifica.
+- No modificar campos que el usuario no pidio cambiar.
+- No continuar despues de un bloqueo de acceso MCP.
