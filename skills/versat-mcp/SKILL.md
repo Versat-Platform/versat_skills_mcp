@@ -13,6 +13,7 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Nunca inventes ids. Resuelve entidades, monedas, unidades, documentos, operaciones, productos y demas foreign keys con tools de busqueda antes de escribir.
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
+- Si una tool devuelve `reintentar=true` o `tipoError="api_versat_error_temporal"`, explica al usuario que la API Versat tuvo una falla temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
 - Si una tool devuelve error de API, muestra el `mensaje`, `errorApi` o `cuerpo` relevante y pregunta solo por el dato faltante o invalido.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
@@ -59,4 +60,4 @@ Despues de escribir:
 - Informa ids creados y etapas completadas.
 - Si hubo exito parcial, informa cabecera creada, detalles creados y etapa que fallo.
 - Valida consultando el registro o detalle creado cuando sea util y barato.
-- No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la API.
+- No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la API o si la tool marcó la respuesta como temporal con `reintentar=true`.
