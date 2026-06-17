@@ -1,6 +1,6 @@
 # Versat MCP Skills
 
-Skills e instrucciones para que agentes de IA usen mejor el servidor MCP de Versat.
+Skills e instrucciones para que agentes de IA usen correctamente el servidor MCP de Versat.
 
 Este repositorio contiene solo material de apoyo para agentes. No contiene el servidor MCP, codigo de backend ni credenciales.
 
@@ -36,6 +36,13 @@ Para usar Versat MCP con un agente se configuran dos cosas:
 
 La URL del MCP y el token deben ser entregados por el administrador de Versat o por el equipo responsable de la implantacion.
 
+Antes de instalar, confirme que tiene:
+
+- URL HTTP del MCP de Versat.
+- Token Versat valido para el usuario o empresa.
+- Cliente/agente con soporte para servidores MCP HTTP remotos o un puente local compatible.
+- Lugar donde colocar instrucciones del agente o skills.
+
 Ejemplo de URL:
 
 ```text
@@ -44,7 +51,9 @@ https://mcp-versat.azurewebsites.net/mcp
 
 ## Configurar el MCP
 
-Siempre que el cliente permita configurar headers manuales, use esta forma:
+El MCP acepta dos formas de autenticacion. Use solo una.
+
+Forma recomendada cuando el cliente permite headers manuales:
 
 ```text
 Header: X-Versat-Mcp-Token
@@ -53,7 +62,7 @@ Valor: <TOKEN_VERSAT>
 
 No agregue `Bearer` en este header.
 
-Si el cliente no permite headers manuales pero tiene autenticacion Bearer nativa, use:
+Forma alternativa cuando el cliente tiene autenticacion Bearer nativa:
 
 ```text
 Authorization: Bearer <TOKEN_VERSAT>
@@ -66,6 +75,17 @@ VERSAT_MCP_TOKEN
 ```
 
 Y defina esa variable en el ambiente donde el agente ejecuta.
+
+No coloque tokens reales en archivos del repositorio, prompts compartidos, logs ni capturas.
+
+## Orden recomendado de configuracion
+
+1. Instale la skill o copie las instrucciones del agente.
+2. Configure el servidor MCP con URL y token.
+3. Reinicie el cliente/agente si no detecta cambios en skills o MCP.
+4. Liste las tools del MCP.
+5. Ejecute una consulta de solo lectura.
+6. Solo despues de validar lectura, habilite flujos de escritura como crear facturas, recibos o entidades.
 
 ## Instalar las Skills en Codex
 
@@ -82,7 +102,14 @@ mkdir -p ~/.codex/skills
 cp -R versat_skills_mcp/skills/versat-mcp ~/.codex/skills/versat-mcp
 ```
 
-3. Reinicie Codex o abra una nueva sesion.
+Si ya existia una version anterior, reemplacela:
+
+```bash
+rm -rf ~/.codex/skills/versat-mcp
+cp -R versat_skills_mcp/skills/versat-mcp ~/.codex/skills/versat-mcp
+```
+
+3. Reinicie Codex o abra una nueva sesion para que cargue la skill actualizada.
 
 4. Configure el servidor MCP en Codex:
 
@@ -198,6 +225,15 @@ La instalacion en VS Code depende de la extension o agente utilizado. El patron 
 
 4. Mantenga los archivos de `references/` disponibles para consultas de contexto.
 
+## Si el cliente no soporta skills
+
+Si el cliente no tiene mecanismo de skills, use este orden:
+
+1. Pegue el [Prompt recomendado para el agente](#prompt-recomendado-para-el-agente) como instruccion del sistema, regla del proyecto o instruccion persistente.
+2. Adjunte o copie `skills/versat-mcp/SKILL.md`.
+3. Mantenga los archivos de `skills/versat-mcp/references/` disponibles para que el agente los consulte cuando la tarea sea de entidades, facturas, recibos o autenticacion.
+4. Para agentes de bajo razonamiento, copie tambien las secciones especificas de la referencia que correspondan al flujo que va a ejecutar.
+
 ## Como saber si quedo funcionando
 
 Desde el agente, haga una prueba simple:
@@ -214,6 +250,13 @@ Consulte os dados da entidade Batman usando o MCP versat
 
 Si el agente lista tools y consigue ejecutar una consulta simple, la instalacion esta lista.
 
+Diagnostico rapido si falla:
+
+- `401`, `Auth required` o `mcp_http_bearer_ausente_o_invalido`: falta token o el header esta mal configurado. Use `X-Versat-Mcp-Token: <TOKEN>` o `Authorization: Bearer <TOKEN>`.
+- `403`, `accesoMcp=false` o `debeDetenerse=true`: el token o la empresa no tiene acceso habilitado al MCP de Versat. No repita tools de negocio.
+- `reintentar=true` o `api_versat_error_temporal`: la API tuvo una falla temporal. Espere `retryAfterSegundos` si viene informado y vuelva a intentar; no lo trate como ausencia de datos.
+- Sin tools listadas: revise que el servidor MCP este configurado con la URL correcta y que el cliente soporte MCP HTTP remoto.
+
 ## Prompt recomendado para el agente
 
 Use este texto como instruccion del agente o como regla del proyecto:
@@ -221,21 +264,28 @@ Use este texto como instruccion del agente o como regla del proyecto:
 ```text
 Eres un agente conectado al MCP de Versat.
 
-Reglas obligatorias:
+Algoritmo obligatorio:
+- Identifica si el usuario quiere consultar, listar, crear, actualizar, procesar, resolver catalogos, diagnosticar acceso o explicar un error.
 - Usa siempre las tools del MCP para consultar, insertar, editar o procesar datos de Versat.
+- Antes de escribir, resuelve entidad, moneda, unidad, tipo de documento, operacion, producto, cuenta, zafra, centro de costo y demas catalogos requeridos.
 - Despues de cada tool, evalua en este orden: bloqueo de acceso, error temporal, error de validacion, ambiguedad, datos insuficientes y exito.
+- Si faltan datos obligatorios, pregunta solo por esos datos. No hagas listas tecnicas largas.
+
+Reglas obligatorias:
 - Nunca inventes datos, ids, valores, nombres, estados, documentos, direcciones o resultados.
 - Si una informacion no viene del MCP, di claramente que no fue encontrada o que necesitas consultar otra tool.
-- No asumas ids. Cuando el usuario informe nombres como entidad, moneda, unidad, operacion, tipo de documento, producto, cuenta, zafra o centro de costo, busca primero el catalogo correspondiente en el MCP.
+- No asumas ids y no pidas ids tecnicos al usuario si existe una tool para resolverlos por nombre.
 - Siempre prefiere responder con nombres amigables de los campos, usando los campos *_txt cuando existan.
 - Evita exponer campos tecnicos internos como id, *_id, Status_hd, descripcion_hd_cb, Creacion_hd o Ult_mod_hd, salvo que el usuario los pida explicitamente.
 - Cuando muestres ids necesarios para auditoria o confirmacion, muestralos junto con el nombre amigable.
 - Si la respuesta de una tool indica debeDetenerse=true, accesoMcp=false o error de acceso, detente inmediatamente y explica que el token o la empresa no tiene acceso al MCP de Versat.
 - Si la respuesta indica reintentar=true o api_versat_error_temporal, explica que la API tuvo una falla temporal, espera retryAfterSegundos si viene informado y no trates la respuesta como ausencia de datos.
 - Si la API retorna un error, muestra el error de forma clara y pregunta al usuario el dato faltante o incorrecto antes de intentar nuevamente.
-- Para cualquier insercion o edicion, confirma los datos principales con el usuario antes de ejecutar, excepto si el usuario pide explicitamente ejecutar directo.
+- Para cualquier insercion o edicion, confirma los datos principales con el usuario antes de ejecutar, excepto si el usuario pide explicitamente ejecutar directo y todos los datos estan resueltos.
 - Para crear registros con Status, usa siempre Borrador en la creacion, salvo que el MCP indique una regla diferente.
+- No cambies Status manualmente para aplicar, desaplicar o anular. Usa la tool de procesamiento correspondiente.
 - Para facturas, primero identifica el tipo correcto: insumos, granos o financiero. Si el usuario dice solamente "factura", pregunta que tipo desea registrar.
+- Si el usuario envia una factura, recibo o comprobante desde imagen/PDF/texto y contiene detalles, no insertes solo la cabecera. Usa la tool completa del recurso cuando exista.
 - Para "mi empresa", usa versat_buscar_empresas; no listes empresas ni intentes buscar por nombre.
 - Para "ultimos" o "mas recientes", no uses pagina=0 como reciente. Obtiene la ultima pagina o reordena por fecha/id.
 - Si hay varias coincidencias razonables para una entidad, factura, recibo u operacion, muestra opciones y pide confirmacion antes de escribir o consultar detalles sensibles.
@@ -251,10 +301,27 @@ Formato de las respuestas:
 Si no existe evidencia directa retornada por una tool MCP, trata la informacion como desconocida.
 ```
 
+## Instrucciones minimas para agentes de bajo razonamiento
+
+Si solo puede colocar pocas instrucciones, use estas:
+
+```text
+Usa solo tools MCP Versat para datos de Versat. Nunca llames directo a la API.
+Nunca inventes ids ni valores. Resuelve catalogos con tools antes de escribir.
+Tras cada tool, revisa: debeDetenerse/accesoMcp, reintentar, error de validacion, ambiguedad, datos insuficientes, exito.
+Si debeDetenerse=true o accesoMcp=false, detente y explica bloqueo de acceso MCP.
+Si reintentar=true, informa falla temporal y espera antes de intentar otra vez.
+Si hay varias coincidencias, pide confirmacion.
+No uses pagina=0 como registros recientes.
+Crea documentos en borrador y procesa aplicar/desaplicar/anular con tools especificas.
+No expongas tokens, headers, StackTrace ni campos tecnicos innecesarios.
+```
+
 ## Buenas practicas
 
 - No suba tokens a Git.
 - Use secretos, variables de ambiente o campos seguros del cliente MCP.
 - Instale la skill en el agente que realmente usara el MCP.
 - Mantenga el nombre del servidor MCP simple, por ejemplo `versat`.
-- Cuando actualice esta skill, copie nuevamente la carpeta `skills/versat-mcp`.
+- Cuando actualice esta skill, copie nuevamente la carpeta `skills/versat-mcp` y reinicie el agente si no detecta cambios.
+- Pruebe primero con una consulta de solo lectura antes de pedir escrituras.

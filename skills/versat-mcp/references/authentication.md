@@ -1,18 +1,24 @@
 # Autenticacion y acceso
 
-El MCP HTTP espera:
+El MCP HTTP acepta una de estas formas:
+
+```http
+X-Versat-Mcp-Token: <token-versat>
+```
+
+o:
 
 ```http
 Authorization: Bearer <token-versat>
 ```
 
-El mismo Bearer se reenvia a la API Versat. No lo imprimas en respuestas finales ni lo guardes en archivos del repositorio.
+El mismo token se reenvia a la API Versat como Bearer. No lo imprimas en respuestas finales ni lo guardes en archivos del repositorio.
 
 ## Diagnostico rapido
 
 `401` o `Auth required` desde MCP:
 
-- El cliente MCP no envio `Authorization`.
+- El cliente MCP no envio `X-Versat-Mcp-Token` ni `Authorization: Bearer`.
 - Corrige la configuracion del servidor MCP en Codex/Azure/cliente.
 - No intentes resolver entidades, catalogos ni facturas hasta corregir el header.
 
