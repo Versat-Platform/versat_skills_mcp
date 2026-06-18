@@ -84,7 +84,7 @@ Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factu
 
 Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y AG91.
 
-Usa solamente campos devueltos por el contrato mapeado de la cabecera o del detalle seleccionado. Las tools rechazan localmente un `filtroCampo` inventado o perteneciente a otro recurso y no lo envían a la API.
+Usa solamente campos admitidos por el contrato de la cabecera o del detalle seleccionado. Las tools rechazan un `filtroCampo` inventado o perteneciente a otro recurso.
 
 ## Crear o duplicar factura
 
@@ -93,7 +93,7 @@ Usa solamente campos devueltos por el contrato mapeado de la cabecera o del deta
 3. Resuelve IDs con catalogos antes de escribir.
 4. Si hay detalles, prefiere la tool completa.
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
-6. Si la API rechaza, informa el error y pregunta solo por el campo necesario.
+6. Si la tool rechaza la solicitud, informa solo el mensaje de negocio y pregunta por el campo necesario.
 
 Checklist minimo antes de crear:
 
@@ -130,15 +130,15 @@ Primero pregunta solo lo esencial:
 7. Moneda por nombre.
 8. Concepto u observación principal.
 9. Número de documento, si el tipo de operación lo requiere o si el usuario lo tiene.
-10. Condición de pago, cuenta financiera, timbrado, ubicación, depósito, zafra o proyecto solo si la API, el contrato de la tool o la operación lo exige.
+10. Condicion de pago, cuenta financiera, timbrado, ubicacion, deposito, zafra o proyecto solo si el contrato de la tool o la operacion lo exige.
 
 Para facturas de insumos, pregunta además los productos como una lista simple: producto, cantidad, precio unitario, tributación si aplica y depósito si aplica. El agente debe resolver `Producto_id` con `versat_buscar_productos_insumos`.
 
 Para facturas de granos, pregunta los datos específicos del flujo de granos solo si el contrato o la operación los exige. No inventes contrato, depósito, chapa, chofer ni transportadora.
 
-Para facturas financieras, pregunta cuenta, clasificación o cuotas solo si el usuario pidió esos detalles o la API los exige.
+Para facturas financieras, pregunta cuenta, clasificacion o cuotas solo si el usuario pidio esos detalles o el contrato de la tool los exige.
 
-Si faltan muchos datos, no hagas una lista técnica larga. Pide en bloques cortos: primero cabecera, luego detalles, luego datos exigidos por la API tras el primer intento.
+Si faltan muchos datos, no hagas una lista tecnica larga. Pide en bloques cortos: primero cabecera, luego detalles y despues los datos que la tool marque como obligatorios.
 
 Ejemplo de pregunta por bloque:
 
@@ -153,7 +153,7 @@ Para crear la factura necesito confirmar estos datos de cabecera: tipo de factur
 3. Usa la tool `versat_actualizar_factura_*` del mismo recurso, pasando `id` y `facturaJson`.
 4. No mezcles recursos: una factura AI71 se actualiza solo con `versat_actualizar_factura_insumos`.
 5. No fuerces `Status=Borrador` en actualización; esa regla aplica solo al alta.
-6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o inválido.
+6. Si la tool rechaza la solicitud, muestra solo el mensaje de negocio y pregunta por el dato faltante o invalido.
 
 En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados por el MCP para conservar solo dígitos.
 

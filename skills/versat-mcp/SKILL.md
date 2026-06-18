@@ -27,12 +27,12 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 
 ## Reglas de ejecucion rapida
 
-- Trata las tools MCP como la interfaz completa de Versat; no presupongas transportes, endpoints ni servicios internos.
+- Trata las tools MCP como la interfaz completa de Versat y respeta sus contratos públicos.
 - Nunca inventes ids. Resuelve entidades, monedas, unidades, documentos, operaciones, productos y demas foreign keys con tools de busqueda antes de escribir.
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
 - Si una tool devuelve `reintentar=true` o un código `servicio_versat_*`, explica al usuario que el servicio Versat tuvo una indisponibilidad temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
-- Si una tool devuelve error de API no temporal, muestra el `mensaje` de negocio disponible y pregunta solo por el dato faltante o invalido. No muestres `StackTrace`, `ExceptionType`, headers, tokens ni texto tecnico interno.
+- Si una tool devuelve un error no temporal, muestra solo el `mensaje` de negocio disponible y pregunta por el dato faltante o invalido. No muestres cuerpos técnicos, `StackTrace`, `ExceptionType`, headers ni tokens.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
 
@@ -58,7 +58,8 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
 - Crear, duplicar, listar, procesar o inspeccionar facturas: lee [references/facturas.md](references/facturas.md).
 - Crear, actualizar, listar, aplicar, desaplicar o anular recibos/transacciones: lee [references/recibos.md](references/recibos.md).
-- Problemas de token, headers, Azure/Codex HTTP MCP o `GetAccesoMCP`: lee [references/authentication.md](references/authentication.md).
+- Resolver ids de catalogos y ayudas auxiliares como monedas, unidades, tipos de documento, operaciones, condiciones de pago, cuentas, depositos, timbrados, zafras, proyectos, tributacion, actividades, centros de costo, empresas, RUCs, tipos de factura y tipos de negociacion: lee [references/catalogos.md](references/catalogos.md).
+- Problemas de token, headers, autenticacion del cliente MCP o acceso denegado: lee [references/authentication.md](references/authentication.md).
 
 ## Decisiones comunes
 
@@ -69,8 +70,8 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Usuario informa nombre de entidad: lee `references/entidades.md`, busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Normaliza mentalmente espacios, puntuacion y abreviaturas como `S.A.` antes de decidir que no existe. Si hay varias coincidencias fuertes, pregunta cual usar.
 - Usuario busca una entidad por numero de RUC: nunca filtres BA31 por `Ruc_uk`. Usa `versat_buscar_rucs`, toma el `id` del RUC y llama `versat_listar_entidades` o `versat_consultar_entidad` con `filtroCampo="Ruc_id"`.
 - Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
-- Usuario pide “mi empresa”, datos de la empresa o configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura; el MCP usa el token y el `Empresa_id` autorizado por `GetAccesoMCP` como contexto, no como búsqueda libre por nombre.
-- Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP usa `Empresa_id` y `Modelo_id` devueltos por `GetAccesoMCP` para filtrar catálogos compatibles como cuentas, tributación y operaciones sin depender de que la API acepte `Modelo_id` como filtro remoto.
+- Usuario pide “mi empresa”, datos de la empresa o configuracion OX01: usa `versat_buscar_empresas`. OX01 es solo lectura y la tool limita la consulta a la empresa autorizada; no hagas una busqueda libre por nombre.
+- Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP aplica internamente el contexto autorizado para filtrar catalogos compatibles como cuentas, tributacion y operaciones.
 - Usuario pide detalles de una factura o recibo por id: usa la tool de detalle del mismo recurso y filtra por `Factura_id` o `Financ_id`.
 - Usuario pide crear cabecera mas detalles: usa la tool completa/orquestadora del recurso cuando exista; evita crear manualmente cabecera y detalles separados.
 
@@ -91,7 +92,7 @@ Despues de escribir:
 - Informa ids creados y etapas completadas.
 - Si hubo exito parcial, informa cabecera creada, detalles creados y etapa que fallo.
 - Valida consultando el registro o detalle creado cuando sea util y barato.
-- No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la API o si la tool marcó la respuesta como temporal con `reintentar=true`.
+- No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la tool o si la respuesta fue marcada como temporal con `reintentar=true`.
 
 ## Prohibiciones criticas
 

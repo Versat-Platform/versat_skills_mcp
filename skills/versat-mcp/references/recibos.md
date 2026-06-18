@@ -91,7 +91,7 @@ Para agregar o consultar detalles:
 3. Si no sabes campos del detalle, llama la tool sin JSON para obtener el contrato.
 4. Si hay varias clases posibles, pregunta cual corresponde al comprobante.
 
-Usa solamente campos devueltos por el contrato mapeado de AF51 o del detalle seleccionado. La tool rechaza localmente un `filtroCampo` inventado o perteneciente a otro recurso y no lo envía a la API.
+Usa solamente campos admitidos por el contrato de AF51 o del detalle seleccionado. La tool rechaza un `filtroCampo` inventado o perteneciente a otro recurso.
 
 ## Errores y recuperacion
 
@@ -99,4 +99,4 @@ Usa solamente campos devueltos por el contrato mapeado de AF51 o del detalle sel
 - Error por campo obligatorio: pregunta solo ese dato.
 - Error por entidad ambigua: resuelve entidad con la referencia de entidades antes de insistir.
 - Exito parcial en tool completa: informa cabecera creada, detalles creados y etapa fallida; verifica antes de repetir.
-- Si el usuario pide anular/desaplicar sin motivo y la API lo exige, pregunta el motivo.
+- Si el usuario pide anular o desaplicar sin motivo y la tool lo exige, pregunta el motivo.

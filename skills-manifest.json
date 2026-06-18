@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -14,6 +14,7 @@
         "SKILL.md",
         "VERSION",
         "references/authentication.md",
+        "references/catalogos.md",
         "references/entidades.md",
         "references/facturas.md",
         "references/recibos.md"

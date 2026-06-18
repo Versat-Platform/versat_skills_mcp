@@ -26,7 +26,7 @@ Cuando el MCP esta detras de un proxy reverso, el proxy debe terminar TLS y envi
 
 `403` con `tipoError="acceso_mcp_denegado"`, `accesoMcp=false` o `debeDetenerse=true`:
 
-- `GetAccesoMCP` devolvio `AcessoMCP=false` o una validacion equivalente rechazada.
+- La validacion de acceso devolvio `accesoMcp=false` o una señal equivalente.
 - Deten la operacion. No consultes ni modifiques datos.
 - Responde claramente: el token o empresa no tiene acceso al MCP de Versat.
 

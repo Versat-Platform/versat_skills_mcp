@@ -67,7 +67,7 @@ Flujo seguro para agentes:
 5. Si no hay coincidencias, repite con terminos distintivos antes de decir que no se encontro.
 6. Para escribir, usa el `id` de la entidad confirmada y no el texto escrito por el usuario.
 
-La interfaz conserva `limit` y `offset` por compatibilidad. El MCP los traduce a `registros_por_pagina` y `pagina`; nunca deben llegar con sus nombres originales a la API BA31. Si usas `offset`, debe ser múltiplo de `limit` (o de 100 cuando omites `limit`) para representar una página exacta.
+La interfaz conserva `limit` y `offset` por compatibilidad y los traduce internamente a paginacion. Si usas `offset`, debe ser multiplo de `limit` (o de 100 cuando omites `limit`) para representar una pagina exacta.
 
 ## Busqueda por nombre
 
@@ -140,7 +140,7 @@ Para crear una entidad:
 3. Si usa `RUC`, busca primero en BA51 con `versat_buscar_rucs` y envía el id encontrado como `Ruc_id`.
 4. Si usa `CI`, envía el número en `CI_uk`.
 5. Envia `entidadJson` con los nombres exactos de campos BA31.
-6. Si la API rechaza, muestra el error y pregunta solo por el dato faltante o invalido.
+6. Si la tool rechaza la solicitud, muestra solo el mensaje de negocio y pregunta por el dato faltante o invalido.
 
 No crees entidad si:
 
@@ -188,7 +188,7 @@ Detalles conocidos:
 ## Errores y ambiguedad
 
 - Si la tool devuelve `reintentar=true`, espera y reintenta una vez; no digas que la entidad no existe.
-- Si la API devuelve validacion de campo obligatorio, pregunta solo ese campo.
+- Si la tool devuelve una validacion de campo obligatorio, pregunta solo ese campo.
 - Si una busqueda devuelve cero resultados con nombre largo, repite con el apellido, razon social principal o palabra mas distintiva.
 - Si el usuario pide datos sensibles de una entidad ambigua, no muestres detalles de candidatos; pide elegir primero.
 - Si el usuario pide "todos", limita la respuesta inicial y ofrece continuar para evitar respuestas enormes.
