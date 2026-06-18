@@ -5,11 +5,19 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
-      "description": "Orientación opcional para usar las tools del MCP Versat con flujos de negocio seguros."
+      "description": "Orientación opcional para usar las tools del MCP Versat con flujos de negocio seguros.",
+      "files": [
+        "SKILL.md",
+        "VERSION",
+        "references/authentication.md",
+        "references/entidades.md",
+        "references/facturas.md",
+        "references/recibos.md"
+      ]
     }
   ]
 }
