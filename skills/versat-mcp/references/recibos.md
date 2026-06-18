@@ -91,6 +91,8 @@ Para agregar o consultar detalles:
 3. Si no sabes campos del detalle, llama la tool sin JSON para obtener el contrato.
 4. Si hay varias clases posibles, pregunta cual corresponde al comprobante.
 
+Usa solamente campos devueltos por el contrato mapeado de AF51 o del detalle seleccionado. La tool rechaza localmente un `filtroCampo` inventado o perteneciente a otro recurso y no lo envía a la API.
+
 ## Errores y recuperacion
 
 - `reintentar=true`: informa falla temporal y no lo trates como ausencia de recibos.

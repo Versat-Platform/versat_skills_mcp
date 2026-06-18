@@ -84,6 +84,8 @@ Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factu
 
 Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y AG91.
 
+Usa solamente campos devueltos por el contrato mapeado de la cabecera o del detalle seleccionado. Las tools rechazan localmente un `filtroCampo` inventado o perteneciente a otro recurso y no lo envían a la API.
+
 ## Crear o duplicar factura
 
 1. Identifica el recurso.

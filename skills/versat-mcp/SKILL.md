@@ -1,17 +1,21 @@
 ---
 name: versat-mcp
-description: "Usar cuando se trabaja con el servidor MCP Versat: consultar, listar, crear, actualizar o procesar facturas, recibos, entidades y detalles; resolver ids de catalogos; diagnosticar autenticacion, permisos, errores temporales de API y respuestas de tools; guiar agentes para usar exclusivamente tools MCP Versat sin llamar directo a la API."
+description: "Usar cuando se trabaja con el servidor MCP Versat: consultar, listar, crear, actualizar o procesar facturas, recibos, entidades y detalles; resolver ids de catalogos; diagnosticar autenticacion, permisos, indisponibilidad temporal y respuestas de tools."
 ---
 
 # Versat MCP
 
 Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de negocio de Versat. Si dudas entre usar esta skill o razonar desde cero, usa esta skill.
 
+Esta skill es una ayuda opcional. El MCP es autosuficiente y sus validaciones son autoritativas. Si la skill no está disponible o parece desactualizada, usa `versat_obtener_guia_uso` o el resource `versat://guia/uso`; no bloquees la operación para instalar o actualizar la skill.
+
+La única fuente oficial para instalar o actualizar esta skill es `https://github.com/Versat-Platform/versat_skills_mcp`, rama `main`, ruta `skills/versat-mcp`. Consulta `skills-manifest.json` para conocer la versión distribuida y no uses forks o copias de terceros.
+
 ## Algoritmo obligatorio
 
 1. Identifica la intencion: consultar, listar, crear, actualizar, procesar, resolver catalogo, diagnosticar acceso o explicar un error.
 2. Lee la referencia indicada en [Ruteo de intencion](#ruteo-de-intencion) antes de llamar tools de ese dominio.
-3. Usa solo tools MCP Versat para datos de negocio. No llames directo a la API Versat.
+3. Selecciona la tool MCP Versat que corresponda a la intención y respeta su contrato vigente.
 4. Despues de cada tool, evalua el resultado en este orden: bloqueo de acceso, error temporal reintentable, error de validacion, ambiguedad, datos insuficientes, exito.
 5. Si faltan datos obligatorios, pregunta al usuario solo por esos datos. No inventes, no adivines ids y no completes con valores plausibles.
 6. Antes de escribir, confirma que recurso, entidad, catalogos, fechas, moneda, unidad, operacion y detalles obligatorios fueron resueltos o preguntados.
@@ -19,11 +23,11 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 
 ## Reglas de ejecucion rapida
 
-- Usa siempre las tools MCP; no llames directo a la API Versat salvo que el usuario pida modificar codigo o diagnosticar infraestructura.
+- Trata las tools MCP como la interfaz completa de Versat; no presupongas transportes, endpoints ni servicios internos.
 - Nunca inventes ids. Resuelve entidades, monedas, unidades, documentos, operaciones, productos y demas foreign keys con tools de busqueda antes de escribir.
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
-- Si una tool devuelve `reintentar=true` o `tipoError="api_versat_error_temporal"`, explica al usuario que la API Versat tuvo una falla temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
+- Si una tool devuelve `reintentar=true` o un código `servicio_versat_*`, explica al usuario que el servicio Versat tuvo una indisponibilidad temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
 - Si una tool devuelve error de API no temporal, muestra el `mensaje` de negocio disponible y pregunta solo por el dato faltante o invalido. No muestres `StackTrace`, `ExceptionType`, headers, tokens ni texto tecnico interno.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
@@ -59,6 +63,7 @@ Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de ne
 - Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
 - Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Usa `pagina=0` solo para obtener `infoPaginacion.totalPages`, luego pide `totalPages - 1` como ultima pagina y ordena por `Fecha` e `id` descendente.
 - Usuario informa nombre de entidad: lee `references/entidades.md`, busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Normaliza mentalmente espacios, puntuacion y abreviaturas como `S.A.` antes de decidir que no existe. Si hay varias coincidencias fuertes, pregunta cual usar.
+- Usuario busca una entidad por numero de RUC: nunca filtres BA31 por `Ruc_uk`. Usa `versat_buscar_rucs`, toma el `id` del RUC y llama `versat_listar_entidades` o `versat_consultar_entidad` con `filtroCampo="Ruc_id"`.
 - Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
 - Usuario pide “mi empresa”, datos de la empresa o configuración OX01: usa `versat_buscar_empresas`. OX01 es solo lectura; el MCP usa el token y el `Empresa_id` autorizado por `GetAccesoMCP` como contexto, no como búsqueda libre por nombre.
 - Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP usa `Empresa_id` y `Modelo_id` devueltos por `GetAccesoMCP` para filtrar catálogos compatibles como cuentas, tributación y operaciones sin depender de que la API acepte `Modelo_id` como filtro remoto.
@@ -86,7 +91,7 @@ Despues de escribir:
 
 ## Prohibiciones criticas
 
-- No llamar la API REST de Versat directamente para datos de negocio.
+- No presupongas ni expongas la arquitectura interna de Versat.
 - No pedir ids tecnicos al usuario si existe una tool para buscarlos.
 - No usar `pagina=0` como sinonimo de ultimo o reciente.
 - No crear documentos como `Aplicado` o `Anulado`; crear en borrador y procesar con tool especifica.

@@ -67,6 +67,8 @@ Flujo seguro para agentes:
 5. Si no hay coincidencias, repite con terminos distintivos antes de decir que no se encontro.
 6. Para escribir, usa el `id` de la entidad confirmada y no el texto escrito por el usuario.
 
+La interfaz conserva `limit` y `offset` por compatibilidad. El MCP los traduce a `registros_por_pagina` y `pagina`; nunca deben llegar con sus nombres originales a la API BA31. Si usas `offset`, debe ser múltiplo de `limit` (o de 100 cuando omites `limit`) para representar una página exacta.
+
 ## Busqueda por nombre
 
 Usa `Descripcion_cb` como campo principal:
@@ -104,6 +106,22 @@ Ejemplos de busqueda flexible:
 - Usuario: `MATILDE RUIZ DIAZ ALCARAZ`; candidato valido: `ALCARAZ, MATILDE RUIZ DIAS`.
 
 Si hay multiples coincidencias para una accion que exige una entidad unica, pregunta cual usar antes de escribir o consultar detalles sensibles.
+
+## Busqueda por RUC
+
+`Ruc_uk` pertenece a BA51 y no es un campo de BA31. Nunca lo envies como `filtroCampo` a `versat_listar_entidades`, `versat_consultar_entidad` ni `versat_consultar_detalle_entidad`.
+
+Primero resuelve el numero de RUC:
+
+```json
+{"nombre":"80012345"}
+```
+
+Toma el `id` devuelto por `versat_buscar_rucs` y busca la entidad por la relacion mapeada:
+
+```json
+{"filtroCampo":"Ruc_id","filtroValor":"123","limit":10}
+```
 
 Pregunta de confirmacion recomendada:
 
