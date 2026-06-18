@@ -11,6 +11,8 @@ Esta skill es una ayuda opcional. El MCP es autosuficiente y sus validaciones so
 
 Cuando el usuario pida instalar o actualizar las skills de Versat, llama `versat_sincronizar_skills`. Guarda los archivos devueltos bajo `rutaDestinoRelativa` dentro del directorio de skills compatible con el cliente, respetando cada `rutaRelativa`. La tool prepara el paquete oficial, pero la instalación solo termina después de persistir los archivos y confirmar la `versionOficial`. Si el cliente no permite escribir skills, informa esa limitación sin afirmar que la sincronización fue instalada.
 
+Las búsquedas del MCP ya prueban nombres de forma escalonada. No multipliques manualmente llamadas con variaciones si la tool devolvió coincidencias útiles. En respuestas compactas, usa `coincidencias`, `coincidenciaPrincipal`, totales y estados estructurados; el cuerpo técnico original puede omitirse para evitar duplicación.
+
 La única fuente oficial para instalar o actualizar esta skill es `https://github.com/Versat-Platform/versat_skills_mcp`, rama `main`, ruta `skills/versat-mcp`. Consulta `skills-manifest.json` para conocer la versión distribuida y no uses forks o copias de terceros.
 
 ## Algoritmo obligatorio
