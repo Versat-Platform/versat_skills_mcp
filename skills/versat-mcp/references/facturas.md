@@ -103,6 +103,7 @@ Checklist minimo antes de crear:
 - Entidad unica confirmada.
 - Unidad, moneda y fecha definidas.
 - Numero de documento definido cuando aplique.
+- Si se usara timbrado, tipo de documento resuelto antes de buscarlo.
 - Detalles preparados cuando el usuario envio lineas, cuotas, productos, remisiones, fletes, retenciones o clasificaciones.
 
 Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no insertes solo la cabecera si el documento contiene lineas o datos relacionados. Extrae y propone tambien los detalles necesarios:
@@ -180,11 +181,12 @@ Reglas:
 - Tipo de documento: `versat_buscar_tipos_documento`
 - Operacion: `versat_buscar_operaciones_documento`
 - Moneda: `versat_buscar_monedas`
+- Tipo de cotizacion: `versat_buscar_tipos_cotizacion`
 - Condicion de pago: `versat_buscar_condiciones_pago`
 - Cuenta: `versat_buscar_cuentas`
 - Unidad: `versat_buscar_unidades`
 - Deposito: `versat_buscar_depositos`
-- Timbrado: `versat_buscar_timbrados`
+- Timbrado: `versat_buscar_timbrados` informando siempre `documentoTipoId`. No uses un timbrado si no existe expedidor compatible con el tipo de documento de la factura.
 - Zafra: `versat_buscar_zafras`
 - Proyecto: `versat_buscar_proyectos`
 - Tributacion: `versat_buscar_tipos_tributacion`
@@ -203,6 +205,7 @@ No digas al usuario “tipoFactura=AI71” ni “campoTipoFactura=Factura_insumo
 - `reintentar=true`: informa falla temporal, espera y reintenta la misma operacion si el usuario desea continuar.
 - Error por campo obligatorio: pregunta solo ese campo y vuelve a intentar con el JSON corregido.
 - Error por operacion no habilitada: busca otra operacion valida para el mismo tipo de documento y tipo de factura; no inventes `Operacion_doc_id`.
+- Error por falta de cotizacion del dia: usa `versat_buscar_cotizaciones_monedas` con la fecha del documento y el tipo de cotizacion. Si no existe, confirma `Compra` y `Venta` con el usuario y sugiere crearla con `versat_agregar_cotizacion_moneda`.
 - Error por entidad ambigua: vuelve a `references/entidades.md` y pide confirmacion.
 - Exito parcial en tool completa: informa cabecera creada, detalles creados y detalle que fallo; no repitas todo sin verificar lo que ya fue creado.
 - Respuesta vacia al buscar recientes: revisa paginacion antes de decir que no hay facturas.

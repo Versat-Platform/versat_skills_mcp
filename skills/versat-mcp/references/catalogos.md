@@ -5,6 +5,7 @@ Usa esta referencia para resolver ids antes de crear o actualizar documentos. No
 ## Tools habituales
 
 - `versat_buscar_monedas`
+- `versat_buscar_tipos_cotizacion`
 - `versat_buscar_unidades`
 - `versat_buscar_tipos_documento`
 - `versat_buscar_operaciones_documento`
@@ -37,6 +38,12 @@ Usa esta referencia para resolver ids antes de crear o actualizar documentos. No
 Para `versat_buscar_operaciones_documento`, primero resuelve el tipo de documento. Luego informa `documentoTipoId` y el tipo de factura correspondiente: `AI71`, `AG91` o `AF31`.
 
 Presenta el resultado como una operacion habilitada para facturas financieras, de insumos o de granos. No expongas al usuario nombres tecnicos usados para validar esa compatibilidad.
+
+## Timbrados
+
+Para `versat_buscar_timbrados`, el tipo de documento es obligatorio. Primero resuelve el tipo de documento y llama la tool informando `documentoTipoId`.
+
+Un timbrado solo esta disponible para una factura si existe un expedidor del timbrado con el mismo tipo de documento. Si falta `documentoTipoId`, no busques timbrados ni sugieras ids.
 
 ## Empresa actual
 

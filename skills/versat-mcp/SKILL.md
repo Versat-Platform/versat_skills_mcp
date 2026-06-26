@@ -32,6 +32,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
 - Si una tool devuelve `reintentar=true` o un código `servicio_versat_*`, explica al usuario que el servicio Versat tuvo una indisponibilidad temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
+- Si una tool devuelve `reintentar=false`, `tipoError="error_versat_no_transitorio"` o indica rechazo de aplicacion, no repitas la misma insercion sin cambios. Informa el `mensaje` controlado y pide corregir los datos.
 - Si una tool devuelve un error no temporal, muestra solo el `mensaje` de negocio disponible y pregunta por el dato faltante o invalido. No muestres cuerpos técnicos, `StackTrace`, `ExceptionType`, headers ni tokens.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
@@ -41,6 +42,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - `EsExitoso=true`: resume datos de negocio. Si hay muchos campos, muestra los utiles y ofrece detalle.
 - `debeDetenerse=true` o `accesoMcp=false`: no sigas. Explica bloqueo de acceso MCP.
 - `reintentar=true`: informa falla temporal. No digas que no hay datos. Reintenta solo despues de esperar `retryAfterSegundos` o unos segundos.
+- `reintentar=false` o `error_versat_no_transitorio`: el rechazo depende de los datos o de la regla aplicada por Versat. No reintentes sin modificar la solicitud.
 - `CodigoEstado=400` o mensaje de validacion: corrige el JSON o pregunta el dato faltante. No repitas la misma llamada sin cambiar nada.
 - Multiples coincidencias razonables: presenta 2 a 5 opciones con nombre y documento si existe; pide confirmacion antes de consultar detalles sensibles o escribir.
 - Respuesta vacia: di que no se encontraron datos con ese criterio y ofrece ampliar busqueda; no concluyas que el registro no existe si solo usaste un filtro estrecho.
@@ -58,7 +60,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
 - Crear, duplicar, listar, procesar o inspeccionar facturas: lee [references/facturas.md](references/facturas.md).
 - Crear, actualizar, listar, aplicar, desaplicar o anular recibos/transacciones: lee [references/recibos.md](references/recibos.md).
-- Resolver ids de catalogos y ayudas auxiliares como monedas, unidades, tipos de documento, operaciones, condiciones de pago, cuentas, depositos, timbrados, zafras, proyectos, tributacion, actividades, centros de costo, empresas, RUCs, tipos de factura y tipos de negociacion: lee [references/catalogos.md](references/catalogos.md).
+- Resolver ids de catalogos y ayudas auxiliares como monedas, tipos de cotizacion, unidades, tipos de documento, operaciones, condiciones de pago, cuentas, depositos, timbrados, zafras, proyectos, tributacion, actividades, centros de costo, empresas, RUCs, tipos de factura y tipos de negociacion: lee [references/catalogos.md](references/catalogos.md).
 - Problemas de token, headers, autenticacion del cliente MCP o acceso denegado: lee [references/authentication.md](references/authentication.md).
 
 ## Decisiones comunes
@@ -66,6 +68,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Usuario pide algo ambiguo: pregunta una sola aclaracion concreta o usa una tool de sugerencia/listado si existe.
 - Usuario dice "quiero cadastrar/criar uma fatura" sin tipo: llama `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`; si sigue ambiguo, pregunta si es `financiera`, `insumos` o `granos`.
 - Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
+- Usuario recibe error de factura por falta de cotizacion del dia: busca en AF01 con `versat_buscar_cotizaciones_monedas`; si no existe, resuelve el tipo con `versat_buscar_tipos_cotizacion`, pide `Compra` y `Venta`, y sugiere `versat_agregar_cotizacion_moneda`.
 - Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Usa `pagina=0` solo para obtener `infoPaginacion.totalPages`, luego pide `totalPages - 1` como ultima pagina y ordena por `Fecha` e `id` descendente.
 - Usuario informa nombre de entidad: lee `references/entidades.md`, busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Normaliza mentalmente espacios, puntuacion y abreviaturas como `S.A.` antes de decidir que no existe. Si hay varias coincidencias fuertes, pregunta cual usar.
 - Usuario busca una entidad por numero de RUC: nunca filtres BA31 por `Ruc_uk`. Usa `versat_buscar_rucs`, toma el `id` del RUC y llama `versat_listar_entidades` o `versat_consultar_entidad` con `filtroCampo="Ruc_id"`.

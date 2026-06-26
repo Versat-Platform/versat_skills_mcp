@@ -139,12 +139,16 @@ Para crear una entidad:
 2. Antes de insertar, confirma si la entidad usará `RUC` o `CI` cuando el usuario no lo haya informado.
 3. Si usa `RUC`, busca primero en BA51 con `versat_buscar_rucs` y envía el id encontrado como `Ruc_id`.
 4. Si usa `CI`, envía el número en `CI_uk`.
-5. Envia `entidadJson` con los nombres exactos de campos BA31.
-6. Si la tool rechaza la solicitud, muestra solo el mensaje de negocio y pregunta por el dato faltante o invalido.
+5. Si el usuario informa tipo de persona, usa `Persona` con `Física` o `Jurídica`. La tool acepta variaciones como `Fisica`, `Pessoa Física` o `Persona Jurídica` y normaliza el valor. También acepta `Persona_juridica_sn` como alias de entrada: `Si` equivale a `Jurídica` y `No` a `Física`; no envíes valores contradictorios.
+6. Informa `Entidad_tipo` con uno o mas tipos separados por coma. Valores permitidos: `Acreedor`, `Banco`, `Cliente`, `Cliente Exterior`, `Corporativo`, `Director`, `Entidad del gobierno`, `Funcionario`, `Otros`, `Proveedor`, `Proveedor Exterior`, `Transportadora`, `Vendedor`.
+7. Envia `entidadJson` con los nombres exactos de campos BA31.
+8. Si la tool rechaza la solicitud, muestra solo el mensaje de negocio y pregunta por el dato faltante o invalido.
 
 No crees entidad si:
 
 - No sabes si el documento debe ser RUC o CI.
+- El usuario informó tipo de persona y no sabes si es física o jurídica.
+- No sabes que `Entidad_tipo` debe usar. Puede ser multiple, por ejemplo `Cliente, Proveedor`.
 - El usuario dio un nombre que coincide con una entidad existente y no confirmo que quiere crear una nueva.
 - Faltan campos obligatorios del contrato de la tool.
 - El `Ruc_id` requerido no fue resuelto por `versat_buscar_rucs`.
@@ -188,6 +192,7 @@ Detalles conocidos:
 ## Errores y ambiguedad
 
 - Si la tool devuelve `reintentar=true`, espera y reintenta una vez; no digas que la entidad no existe.
+- Si la tool devuelve `reintentar=false` o `error_versat_no_transitorio`, no repitas la misma insercion; usa el mensaje controlado para pedir correccion de datos.
 - Si la tool devuelve una validacion de campo obligatorio, pregunta solo ese campo.
 - Si una busqueda devuelve cero resultados con nombre largo, repite con el apellido, razon social principal o palabra mas distintiva.
 - Si el usuario pide datos sensibles de una entidad ambigua, no muestres detalles de candidatos; pide elegir primero.
