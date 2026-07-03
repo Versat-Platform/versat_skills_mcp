@@ -39,6 +39,7 @@ No uses palabras sueltas como unica evidencia. Ejemplos:
 - actualizar: `versat_actualizar_factura_financiero`
 - agregar completa: `versat_agregar_factura_completa_financiero`
 - detalle: `versat_consultar_detalle_factura_financiero`
+- actualizar detalle: `versat_actualizar_detalle_factura_financiero`
 - procesar: `versat_procesar_facturas_financiero`
 
 `AI71` facturas de insumos:
@@ -48,6 +49,7 @@ No uses palabras sueltas como unica evidencia. Ejemplos:
 - actualizar: `versat_actualizar_factura_insumos`
 - agregar completa: `versat_agregar_factura_completa_insumos`
 - detalle: `versat_consultar_detalle_factura_insumos`
+- actualizar detalle: `versat_actualizar_detalle_factura_insumos`
 - procesar: `versat_procesar_facturas_insumos`
 - productos facturados: detalle `Factura_producto`
 
@@ -58,6 +60,7 @@ No uses palabras sueltas como unica evidencia. Ejemplos:
 - actualizar: `versat_actualizar_factura_granos`
 - agregar completa: `versat_agregar_factura_completa_granos`
 - detalle: `versat_consultar_detalle_factura_granos`
+- actualizar detalle: `versat_actualizar_detalle_factura_granos`
 - procesar: `versat_procesar_facturas_granos`
 
 ## Registros recientes
@@ -85,6 +88,16 @@ Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factu
 Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y AG91.
 
 Usa solamente campos admitidos por el contrato de la cabecera o del detalle seleccionado. Las tools rechazan un `filtroCampo` inventado o perteneciente a otro recurso.
+
+Los subdetalles se consultan con el mismo patrón: recurso de la cabecera y `detalle` con el nombre técnico del subdetalle. Para insertar o actualizar un subdetalle, primero debe existir el detalle padre y debes usar el id generado por ese detalle.
+
+Subdetalles conocidos:
+
+- AF31: `Factura_clasificacion_cc` y `Factura_clasificacion_deveng` bajo `Factura_clasificacion`.
+- AG91: `Factura_clasificacion_cc` bajo `Factura_clasificacion`.
+- AI71: `Factura_producto_lote` bajo `Factura_producto` y `Factura_clasificacion_cc` bajo `Factura_clasificacion`.
+
+En clasificaciones contables, si Versat informa que una cuenta requiere centro de costo, inserta `Factura_clasificacion_cc` con el `Factura_clasificacion_id` correspondiente y reintenta solo después de corregir ese dato.
 
 ## Crear o duplicar factura
 
