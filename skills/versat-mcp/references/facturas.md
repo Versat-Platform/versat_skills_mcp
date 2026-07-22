@@ -2,6 +2,10 @@
 
 Usa estas reglas para listar, inspeccionar, crear, actualizar, duplicar o procesar facturas en Versat MCP.
 
+Antes de definir filtros para una view, consúltala sin filtros. Usa únicamente nombres de campos presentes en los registros devueltos y elimina cualquier filtro que la view no exponga.
+
+En pruebas de inserción, aplica la factura al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. No apliques altas parciales.
+
 ## Indice
 
 - [Seleccion de tipo](#seleccion-de-tipo)
@@ -99,6 +103,14 @@ Subdetalles conocidos:
 
 En clasificaciones contables, si Versat informa que una cuenta requiere centro de costo, inserta `Factura_clasificacion_cc` con el `Factura_clasificacion_id` correspondiente y reintenta solo después de corregir ese dato.
 
+Para resolver `Centro_costo_id` de `Factura_clasificacion_cc`, usa la tool específica del recurso e informa la actividad de negocio de la clasificación padre:
+
+- AF31: `versat_buscar_centros_costo_clasificacion_factura_financiero`
+- AI71: `versat_buscar_centros_costo_clasificacion_factura_insumos`
+- AG91: `versat_buscar_centros_costo_clasificacion_factura_granos`
+
+El MCP incluye centros vinculados a esa actividad y centros generales sin actividad, siempre restringidos a la empresa autorizada. No pidas ni envíes `Empresa_id`.
+
 ## Crear o duplicar factura
 
 1. Identifica el recurso.
@@ -107,6 +119,8 @@ En clasificaciones contables, si Versat informa que una cuenta requiere centro d
 4. Si hay detalles, prefiere la tool completa.
 5. Para copias, toma la factura origen, elimina campos tecnicos (`id`, textos calculados, auditoria), cambia fechas y deja que el MCP fuerce `Status=Borrador`.
 6. Si la tool rechaza la solicitud, informa solo el mensaje de negocio y pregunta por el campo necesario.
+
+La cabecera y cada cuerpo de detalle deben ser objetos JSON completos. El servidor rechaza JSON inválido y campos obligatorios ausentes antes de crear la cabecera; corrige los campos listados y vuelve a intentar una sola vez con el cuerpo completo.
 
 Checklist minimo antes de crear:
 
@@ -126,6 +140,10 @@ Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no
 - Financiero: `Factura_clasificacion` para cuenta/clasificación; `Factura_cuota` para vencimientos; `Factura_baja` para bajas; `Factura_retencion` para retenciones; `Factura_flete` para flete.
 
 Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera.
+
+Si un producto de AI71 controla lote, crea primero `Factura_producto` y después `Factura_producto_lote` con el id del producto facturado. En el alta del subdetalle no envíes `Producto_lote_id`: Versat lo genera. Informa `Factura_producto_id`, `Producto_id`, `Lote_id` y `Cantidad`.
+
+Resuelve `Lote_id` con `versat_buscar_lotes_producto_factura_insumos`. Informa producto, depósito, fecha y las opciones Si/No para admitir lotes vencidos y lotes marcados para visualización sin saldo. El MCP envía únicamente los filtros autorizados y aplica localmente las reglas de fecha y saldo.
 
 Si el usuario informa `Doc_num` o `Codigo_control_elec` con guiones, puntos o espacios, no pidas que lo corrija. El MCP normaliza esos campos antes de enviar a Versat y conserva solo dígitos.
 
@@ -192,14 +210,46 @@ Reglas:
 - Entidad: lee `references/entidades.md` y usa `versat_listar_entidades` con `Descripcion_cb`; no descartes coincidencias por espacios, puntuacion, orden de nombres o abreviaturas como `S.A.`.
 - Direccion de entidad: `versat_consultar_entidad` con `consulta="direccion"`
 - Tipo de documento: `versat_buscar_tipos_documento`
-- Operacion: `versat_buscar_operaciones_documento`
+- Operación de cabecera AF31: `versat_buscar_operaciones_documento_factura_financiero`, informando el tipo de documento previamente resuelto.
+- Operación de cabecera AG91: `versat_buscar_operaciones_documento_factura_granos`, informando el tipo de documento previamente resuelto.
+- Operación de cabecera AI71: `versat_buscar_operaciones_documento_factura_insumos`, informando el tipo de documento previamente resuelto.
+- Factura de referencia de cabecera AI71: `versat_buscar_facturas_referencia_insumos`, informando entidad y zafra. Use `zafraId=0` solo cuando no deba restringirse por zafra.
+- Tipo de pedido de cabecera AI71: `versat_buscar_tipos_pedido_factura_insumos`, informando la entidad. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Producto facturado AI71: `versat_buscar_productos_factura_insumos`, informando el depósito. Use el resultado como `Producto_id` de `Factura_producto`; la búsqueda excluye productos inactivos.
+- Tributación de producto facturado AI71: `versat_buscar_tributaciones_producto_factura_insumos`, informando el tipo de documento. Use el resultado como `Tributacion_id` de `Factura_producto`.
+- Producto de pedido para facturar AI71: `versat_buscar_pedidos_producto_factura_insumos`, informando entidad, producto, zafra y si es devolución. Use `zafraId=0` solo cuando no deba restringirse por zafra.
+- Centro de costo de producto facturado AI71: `versat_buscar_centros_costo_producto_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Tributación de Fletes y Seguros AI71: `versat_buscar_tributaciones_flete_factura_insumos`, informando el tipo de documento.
+- Centro de costo de Fletes y Seguros AI71: `versat_buscar_centros_costo_flete_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada.
+- Cuenta de clasificación contable AI71: `versat_buscar_cuentas_clasificacion_factura_insumos`, informando moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable. Esta búsqueda es distinta de la cuenta de cabecera.
+- Tributación de clasificación contable AI71: `versat_buscar_tributaciones_clasificacion_factura_insumos`, informando el tipo de documento. No use el catálogo general de tributaciones para este campo.
+- Flujo de caja de baja de anticipos AI71: `versat_buscar_flujos_caja_baja_factura_insumos`, informando la entidad. No envíe el sentido del movimiento, porque esta búsqueda solo necesita la entidad. Use el resultado como `Flujo_caja_id` de `Factura_baja`.
+- Factura de referencia de cabecera AG91: `versat_buscar_facturas_referencia_granos`, informando entidad y zafra. Use `zafraId=0` solo cuando la búsqueda no deba restringirse por zafra.
+- Contrato de cabecera AG91: `versat_buscar_contratos_factura_granos`, informando entidad y zafra. Use `zafraId=0` solo cuando la búsqueda no deba restringirse por zafra.
+- Cheque de cabecera AG91: `versat_buscar_cheques_factura_granos`. La consulta no requiere filtros adicionales.
+- Producto facturado AG91: `versat_buscar_productos_factura_granos`, informando el depósito. Use el resultado como `Producto_id` de `Factura_producto`; la búsqueda excluye productos inactivos.
+- Tributación de producto facturado AG91: `versat_buscar_tributaciones_producto_factura_granos`, informando el tipo de documento. Use el resultado como `Tributacion_id` de `Factura_producto`.
+- Centro de costo de producto facturado AG91: `versat_buscar_centros_costo_producto_factura_granos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Tributación de Fletes y Seguros AG91: `versat_buscar_tributaciones_flete_factura_granos`, informando el tipo de documento.
+- Cuenta de clasificación contable AG91: `versat_buscar_cuentas_clasificacion_factura_granos`, informando moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable.
+- Tributación de clasificación contable AG91: `versat_buscar_tributaciones_clasificacion_factura_granos`, informando el tipo de documento.
+- Flujo de caja de baja de anticipos AG91: `versat_buscar_flujos_caja_baja_factura_granos`, informando la entidad. No envíe el sentido del movimiento, porque esta búsqueda solo necesita la entidad.
+- Remisión a liquidar AG91: `versat_buscar_remisiones_liquidar_factura_granos`, informando entidad y zafra. Use el resultado como `Remision_id` de `Factura_remision`.
+- Otras operaciones: `versat_buscar_operaciones_documento`
 - Moneda: `versat_buscar_monedas`
 - Tipo de cotizacion: `versat_buscar_tipos_cotizacion`
 - Condicion de pago: `versat_buscar_condiciones_pago`
-- Cuenta: `versat_buscar_cuentas`
+- Cuenta de cabecera AF31: `versat_buscar_cuentas_factura_financiero`, después de resolver moneda y operación. No envíe condición de pago ni sentido contable a esta consulta, ni use el catálogo general de cuentas para este campo.
+- Cuenta de cabecera AG91: `versat_buscar_cuentas_factura_granos`, después de resolver moneda y operación. No envíe condición de pago ni sentido contable a esta consulta, ni use el catálogo general de cuentas para este campo.
+- Cuenta de cabecera AI71: `versat_buscar_cuentas_factura_insumos`, después de resolver moneda y operación. No envíe condición de pago ni sentido contable a esta consulta, ni use el catálogo general de cuentas para este campo.
+- Cuenta de clasificación contable AF31: `versat_buscar_cuentas_clasificacion_factura_financiero`, después de resolver moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable. Esta búsqueda es distinta de la cuenta de cabecera.
+- Tributación de clasificación contable AF31: `versat_buscar_tributaciones_clasificacion_factura_financiero`, informando el tipo de documento previamente resuelto. No use el catálogo general de tributaciones para este campo.
+- Tributación de Fletes y Seguros AF31: `versat_buscar_tributaciones_flete_factura_financiero`, informando el tipo de documento previamente resuelto. Use el resultado como `Tributacion_id` de `Factura_flete`.
+- Flujo de caja de baja de anticipos AF31: `versat_buscar_flujos_caja_baja_factura_financiero`, informando la entidad. No envíe el sentido del movimiento, porque esta búsqueda solo necesita la entidad. Use el resultado como `Flujo_caja_id` de `Factura_baja`.
+- Otras cuentas contables: `versat_buscar_cuentas`
 - Unidad: `versat_buscar_unidades`
 - Deposito: `versat_buscar_depositos`
-- Timbrado: `versat_buscar_timbrados` informando siempre `documentoTipoId`. No uses un timbrado si no existe expedidor compatible con el tipo de documento de la factura.
+- Timbrado general: `versat_buscar_timbrados` informando siempre `documentoTipoId`. Para las tools específicas de factura, la view usa entidad y emisión cuando emite `El Parcero`, o tipo de documento, unidad y emisión cuando emite `La Empresa`. No uses un timbrado si no existe una coincidencia compatible.
 - Zafra: `versat_buscar_zafras`
 - Proyecto: `versat_buscar_proyectos`
 - Tributacion: `versat_buscar_tipos_tributacion`
@@ -209,7 +259,7 @@ Reglas:
 
 Cuando haya varias coincidencias, elige solo si la coincidencia principal es evidente; si no, pregunta.
 
-Para resolver la operación de una factura, primero resuelve el tipo de documento y después llama `versat_buscar_operaciones_documento` informando `documentoTipoId` y `tipoFactura` (`AI71`, `AG91` o `AF31`). Usa el id retornado por la tool como `Operacion_doc_id` en el JSON, pero al responder al usuario muestra el nombre amigable de la operación, no el campo técnico.
+Para resolver la operación de cabecera, primero resuelve el tipo de documento. En AF31 llama `versat_buscar_operaciones_documento_factura_financiero`; en AG91 llama `versat_buscar_operaciones_documento_factura_granos`; en AI71 llama `versat_buscar_operaciones_documento_factura_insumos`. Informa `documentoTipoId` en cada caso. Para otros contextos sin tool específica, usa `versat_buscar_operaciones_documento` con el tipo de factura correspondiente. Usa el id retornado como `Operacion_doc_id` en el JSON, pero al responder al usuario muestra el nombre amigable de la operación, no el campo técnico.
 
 No digas al usuario “tipoFactura=AI71” ni “campoTipoFactura=Factura_insumos_sn”. Traduce esa validación como “operación habilitada para facturas de insumos”, “operación habilitada para facturas de granos” o “operación habilitada para facturas financieras”.
 

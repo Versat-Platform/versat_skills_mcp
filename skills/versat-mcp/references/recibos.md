@@ -1,5 +1,7 @@
 # Recibos y transacciones AF51
 
+En pruebas de inserción, aplica el recibo al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. No apliques altas parciales.
+
 ## Tools
 
 - `versat_listar_recibos_transacciones`
@@ -29,6 +31,8 @@ Si la tool no devuelve paginacion, ordena los registros recibidos por fecha/id a
 3. Usa `versat_agregar_recibo_transaccion_completo` cuando haya detalles.
 4. Informa id creado y detalles creados.
 
+La cabecera y cada cuerpo de detalle deben ser objetos JSON completos. El servidor valida sus campos obligatorios antes de escribir. Si devuelve `json_alta_invalido` o `campos_obligatorios_alta_faltantes`, corrige solo el cuerpo señalado y no reintentes sin cambios.
+
 Checklist minimo antes de crear:
 
 - Entidad unica confirmada.
@@ -40,6 +44,7 @@ Checklist minimo antes de crear:
 Cuando el usuario envie un recibo o comprobante para ser leido desde imagen, PDF o texto, no insertes solo la cabecera si el documento contiene detalles. Extrae y propone tambien:
 
 - `Financ_caja`: movimiento de caja/cuenta, entrada o salida, moneda, condición, cuenta, cheque y valor.
+- `Financ_caja_cuota`: cuota del movimiento de caja; se crea después de `Financ_caja` con el id devuelto por ese detalle.
 - `Financ_baja`: baja o cancelación de títulos/flujo de caja, valor baja, descuento o interés.
 - `Financ_factura`: factura/documento financiero vinculado al recibo.
 
@@ -53,6 +58,10 @@ Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La
 - Cuenta: `versat_buscar_cuentas`
 - Condicion de pago: `versat_buscar_condiciones_pago`
 - Zafra: `versat_buscar_zafras`
+- Título o flujo de caja para `Financ_baja`: `versat_buscar_flujos_caja_baja_titulos_recibo`, informando la entidad del recibo o transacción. Use el resultado como `Flujo_caja_id`.
+- Cuenta de movimiento de caja: `versat_buscar_cuentas_movimiento_caja_recibo`, informando solamente la moneda. No envíe el movimiento como filtro de esta consulta. Use el resultado como `Cuenta_id` de `Financ_caja`.
+- Cheque de movimiento de caja: `versat_buscar_cheques_movimiento_caja_recibo`, sin filtros adicionales. Use el resultado como `Cheque_id` de `Financ_caja`.
+- Centro de costo de movimiento de caja: `versat_buscar_centros_costo_movimiento_caja_recibo`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pida `Empresa_id` al usuario.
 
 ## Actualizar recibo
 
@@ -80,6 +89,7 @@ Detalles AF51:
 
 - `Financ_baja`
 - `Financ_caja`
+- `Financ_caja_cuota`
 - `Financ_factura`
 
 Consulta detalles con `Financ_id`.
@@ -90,6 +100,8 @@ Para agregar o consultar detalles:
 2. Usa `Financ_id` como filtro o relacion.
 3. Si no sabes campos del detalle, llama la tool sin JSON para obtener el contrato.
 4. Si hay varias clases posibles, pregunta cual corresponde al comprobante.
+
+Antes de aplicar, si la condición del movimiento de caja exige cuotas, crea `Financ_caja_cuota`. La suma y cantidad de cuotas deben corresponder al `Valor` y a la `Condicion_id` del `Financ_caja`.
 
 Usa solamente campos admitidos por el contrato de AF51 o del detalle seleccionado. La tool rechaza un `filtroCampo` inventado o perteneciente a otro recurso.
 

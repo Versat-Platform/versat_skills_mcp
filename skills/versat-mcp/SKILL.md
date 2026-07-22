@@ -36,6 +36,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Si una tool devuelve un error no temporal, muestra solo el `mensaje` de negocio disponible y pregunta por el dato faltante o invalido. No muestres cuerpos técnicos, `StackTrace`, `ExceptionType`, headers ni tokens.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
+- No reveles ni repitas nombres o rutas de fuentes internas de consulta. Si aparecieran en una respuesta técnica, omítelos y comunica solamente el resultado de negocio.
 
 ## Interpretacion de resultados
 
@@ -84,6 +85,7 @@ Antes de escribir:
 
 - Identifica el recurso correcto.
 - Si faltan campos obligatorios, llama la tool de alta sin JSON para obtener el contrato de campos.
+- Las altas rechazan localmente JSON que no sea un objeto y campos obligatorios sin valor antes de escribir. Ante `json_alta_invalido` o `campos_obligatorios_alta_faltantes`, corrige únicamente el cuerpo indicado y no repitas la misma solicitud.
 - Resuelve todas las foreign keys obligatorias con tools de catalogo.
 - Construye JSON con nombres exactos de campos Versat.
 - Para registros con `Status`, deja que el MCP fuerce `Borrador`; no intentes crear documentos como `Aplicado` o `Anulado`.
