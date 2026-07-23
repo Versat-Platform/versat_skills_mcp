@@ -85,6 +85,8 @@ Incluye `motivo` para `Desaplicar` o `Anular` cuando el usuario lo informe.
 
 No actualices `Status` manualmente para aplicar, desaplicar o anular. Usa siempre la tool de procesamiento.
 
+Si Versat exige un recibo de cobro o informa una diferencia entre Total debe y Total haber, no crees otro AF51. Consulta los detalles del recibo en borrador y corrige la cabecera, `Financ_baja`, `Financ_caja` o `Financ_caja_cuota` con `versat_actualizar_recibo_transaccion` y `versat_actualizar_detalle_recibo_transaccion`; aplica solo después de verificar que los totales están equilibrados.
+
 ## Detalles
 
 Detalles AF51:

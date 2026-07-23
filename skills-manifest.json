@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.45",
+      "version": "1.2.46",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -21,14 +21,14 @@
         "references/recibos.md"
       ],
       "sha256": {
-        "SKILL.md": "16e15b9f79c0a85125cef74a07fc07d714bf3d5eda2ed6e8327a40663e3e3597",
-        "VERSION": "f245e07b3d1bd5d02122fe1610bf1c1380020e9e380c85ca4b33c4bd60f4a008",
+        "SKILL.md": "2771aba0c04e7f4afa6080b44c3a73a5ffb26cd37408e40a40a473692c9db5c8",
+        "VERSION": "df6fc7f1addc4154201786ff5c69b99c000dd813209983fde6041b60b8d72e89",
         "agents/openai.yaml": "6427a57175b9e8bd0b3c73097c301c8e01a493d461cf37ce4a712926b702713d",
         "references/authentication.md": "69c08321a8734152390d1fef527f3e0197a7d1a1548f4b560bc48ff8d31df113",
         "references/catalogos.md": "5d392fc084c306629a42459c280f1d1f68ed99a1fad0caa93fdef96f8c4cb6be",
         "references/entidades.md": "bb2285e78de95b560dd08a2e526fd1a5cc06829d7ceb254d2c379c2ec631c96c",
         "references/facturas.md": "bc0f0e105652af4e90c5ae21d5b3eb9f4d88f2b2925fe59e71e24b6fff776a44",
-        "references/recibos.md": "9affbfe9ed04239a58074416219485820434da2f2b76ee12074eb7688abe6d31"
+        "references/recibos.md": "5b1c89dad4735698d368814ed02eac48faf9c4ff12f47472095f8e5d800acc14"
       }
     }
   ]
