@@ -35,7 +35,13 @@ Usa esta referencia para resolver ids antes de crear o actualizar documentos. No
 
 ## Operaciones de documento
 
-Para `versat_buscar_operaciones_documento`, primero resuelve el tipo de documento. Luego informa `documentoTipoId` y el tipo de factura correspondiente: `AI71`, `AG91` o `AF31`.
+Para resolver la operación de la cabecera de una factura, primero resuelve el tipo de documento y usa la tool específica del recurso:
+
+- AF31: `versat_buscar_operaciones_documento_factura_financiero`
+- AG91: `versat_buscar_operaciones_documento_factura_granos`
+- AI71: `versat_buscar_operaciones_documento_factura_insumos`
+
+Usa `versat_buscar_operaciones_documento` únicamente en otros contextos sin una tool específica. En ese caso, informa `documentoTipoId` y el tipo de factura correspondiente: `AI71`, `AG91` o `AF31`.
 
 Presenta el resultado como una operacion habilitada para facturas financieras, de insumos o de granos. No expongas al usuario nombres tecnicos usados para validar esa compatibilidad.
 

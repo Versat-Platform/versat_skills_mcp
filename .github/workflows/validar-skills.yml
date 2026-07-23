@@ -1,0 +1,16 @@
+name: Validar skills
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+      - name: Validar distribución
+        run: ruby scripts/validar_distribucion.rb

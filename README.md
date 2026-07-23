@@ -4,7 +4,7 @@ Skills e instrucciones para que agentes de IA usen correctamente el servidor MCP
 
 Este repositorio contiene solo material de apoyo para agentes. No contiene el servidor MCP, codigo de backend ni credenciales.
 
-Este repositorio, en la rama `main`, es la fuente oficial para instalar y actualizar las skills de Versat. `skills-manifest.json` publica las versiones y rutas vigentes, y cada skill incluye un archivo `VERSION` para comparar la instalación local. No use forks o copias de terceros como fuente de actualización.
+Este repositorio, en la rama `main`, es la fuente oficial para instalar y actualizar las skills de Versat. `skills-manifest.json` publica las versiones, rutas y hashes SHA-256 vigentes, y cada skill incluye un archivo `VERSION` para comparar la instalación local. No use forks o copias de terceros como fuente de actualización.
 
 ## Que hay en este repositorio
 
@@ -14,8 +14,11 @@ skills/
   versat-mcp/
     VERSION
     SKILL.md
+    agents/
+      openai.yaml
     references/
       authentication.md
+      catalogos.md
       entidades.md
       facturas.md
       recibos.md

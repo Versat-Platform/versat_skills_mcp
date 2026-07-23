@@ -143,7 +143,7 @@ Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool iny
 
 Si un producto de AI71 controla lote, crea primero `Factura_producto` y después `Factura_producto_lote` con el id del producto facturado. En el alta del subdetalle no envíes `Producto_lote_id`: Versat lo genera. Informa `Factura_producto_id`, `Producto_id`, `Lote_id` y `Cantidad`.
 
-Resuelve `Lote_id` con `versat_buscar_lotes_producto_factura_insumos`. Informa producto, depósito, fecha y las opciones Si/No para admitir lotes vencidos y lotes marcados para visualización sin saldo. El MCP envía únicamente los filtros autorizados y aplica localmente las reglas de fecha y saldo.
+Resuelve `Lote_id` con `versat_buscar_lotes_producto_factura_insumos`. Informa producto, depósito, fecha y las opciones Si/No para admitir lotes vencidos y lotes sin saldo. Con `incluirLotesSinSaldo=No`, la tool excluye lotes con saldo físico y contable cero; con `Si`, solo los incluye si su configuración permite mostrarlos sin saldo.
 
 Si el usuario informa `Doc_num` o `Codigo_control_elec` con guiones, puntos o espacios, no pidas que lo corrija. El MCP normaliza esos campos antes de enviar a Versat y conserva solo dígitos.
 
@@ -164,7 +164,7 @@ Primero pregunta solo lo esencial:
 9. Número de documento, si el tipo de operación lo requiere o si el usuario lo tiene.
 10. Condicion de pago, cuenta financiera, timbrado, ubicacion, deposito, zafra o proyecto solo si el contrato de la tool o la operacion lo exige.
 
-Para facturas de insumos, pregunta además los productos como una lista simple: producto, cantidad, precio unitario, tributación si aplica y depósito si aplica. El agente debe resolver `Producto_id` con `versat_buscar_productos_insumos`.
+Para facturas de insumos, pregunta además los productos como una lista simple: producto, cantidad, precio unitario, tributación si aplica y depósito si aplica. Después de resolver el depósito, el agente debe resolver `Producto_id` con `versat_buscar_productos_factura_insumos`, que devuelve los productos activos con stock válidos para `Factura_producto`.
 
 Para facturas de granos, pregunta los datos específicos del flujo de granos solo si el contrato o la operación los exige. No inventes contrato, depósito, chapa, chofer ni transportadora.
 
@@ -217,7 +217,7 @@ Reglas:
 - Tipo de pedido de cabecera AI71: `versat_buscar_tipos_pedido_factura_insumos`, informando la entidad. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
 - Producto facturado AI71: `versat_buscar_productos_factura_insumos`, informando el depósito. Use el resultado como `Producto_id` de `Factura_producto`; la búsqueda excluye productos inactivos.
 - Tributación de producto facturado AI71: `versat_buscar_tributaciones_producto_factura_insumos`, informando el tipo de documento. Use el resultado como `Tributacion_id` de `Factura_producto`.
-- Producto de pedido para facturar AI71: `versat_buscar_pedidos_producto_factura_insumos`, informando entidad, producto, zafra y si es devolución. Use `zafraId=0` solo cuando no deba restringirse por zafra.
+- Producto de pedido para facturar AI71: `versat_buscar_pedidos_producto_factura_insumos`, informando entidad, producto, zafra y si es devolución. La devolución se filtra localmente porque no es un filtro admitido por la consulta. Use `zafraId=0` para omitir el filtro de zafra.
 - Centro de costo de producto facturado AI71: `versat_buscar_centros_costo_producto_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
 - Tributación de Fletes y Seguros AI71: `versat_buscar_tributaciones_flete_factura_insumos`, informando el tipo de documento.
 - Centro de costo de Fletes y Seguros AI71: `versat_buscar_centros_costo_flete_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada.
@@ -234,7 +234,8 @@ Reglas:
 - Cuenta de clasificación contable AG91: `versat_buscar_cuentas_clasificacion_factura_granos`, informando moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable.
 - Tributación de clasificación contable AG91: `versat_buscar_tributaciones_clasificacion_factura_granos`, informando el tipo de documento.
 - Flujo de caja de baja de anticipos AG91: `versat_buscar_flujos_caja_baja_factura_granos`, informando la entidad. No envíe el sentido del movimiento, porque esta búsqueda solo necesita la entidad.
-- Remisión a liquidar AG91: `versat_buscar_remisiones_liquidar_factura_granos`, informando entidad y zafra. Use el resultado como `Remision_id` de `Factura_remision`.
+- Opción completa de remisión AG91: `versat_buscar_opciones_factura_granos_con_remision`, informando entidad y zafra. Usa juntos los ids de remisión, producto, depósito, operación y contrato de una misma opción; no mezcles resultados. La tool descarta contratos vinculados sin saldo de facturación.
+- Remisión a liquidar AG91: `versat_buscar_remisiones_liquidar_factura_granos`, informando entidad y zafra, solo para consultas simples antes de resolver la combinación completa.
 - Otras operaciones: `versat_buscar_operaciones_documento`
 - Moneda: `versat_buscar_monedas`
 - Tipo de cotizacion: `versat_buscar_tipos_cotizacion`

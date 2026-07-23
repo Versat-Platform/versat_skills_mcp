@@ -48,6 +48,8 @@ Cuando el usuario envie un recibo o comprobante para ser leido desde imagen, PDF
 - `Financ_baja`: baja o cancelación de títulos/flujo de caja, valor baja, descuento o interés.
 - `Financ_factura`: factura/documento financiero vinculado al recibo.
 
+`Financ_factura` crea la cabecera de una factura no provisionada. El id que devuelve el alta del detalle es su `Factura_id`. Antes de aplicar el recibo, usa ese id con `versat_agregar_detalle_factura_financiero` para crear `Factura_clasificacion`, `Factura_cuota` y cualquier otro detalle AF31 exigido por la operación, la cuenta o la condición de pago. Si una clasificación necesita centro de costo o devengamiento, crea después `Factura_clasificacion_cc` o `Factura_clasificacion_deveng` usando el id de la clasificación. No apliques la factura por separado: completa sus detalles y aplica solamente el AF51.
+
 Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La tool inyecta `Financ_id` automáticamente después de crear la cabecera.
 
 ## Resolucion de IDs
@@ -102,6 +104,8 @@ Para agregar o consultar detalles:
 4. Si hay varias clases posibles, pregunta cual corresponde al comprobante.
 
 Antes de aplicar, si la condición del movimiento de caja exige cuotas, crea `Financ_caja_cuota`. La suma y cantidad de cuotas deben corresponder al `Valor` y a la `Condicion_id` del `Financ_caja`.
+
+Antes de aplicar un AF51 con `Financ_factura`, toma cada `resultado.cuerpo` devuelto para ese detalle como `Factura_id` y completa la factura no provisionada con las tools de detalles AF31. El recibo solo está listo para aplicar cuando esas facturas tienen sus clasificaciones, cuotas y subdetalles requeridos.
 
 Usa solamente campos admitidos por el contrato de AF51 o del detalle seleccionado. La tool rechaza un `filtroCampo` inventado o perteneciente a otro recurso.
 
