@@ -32,7 +32,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
 - Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
 - Si una tool devuelve `reintentar=true` o un código `servicio_versat_*`, explica al usuario que el servicio Versat tuvo una indisponibilidad temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
-- Si una tool devuelve `reintentar=false`, `tipoError="error_versat_no_transitorio"` o indica rechazo de aplicacion, no repitas la misma insercion sin cambios. Informa el `mensaje` controlado y pide corregir los datos.
+- Si una tool devuelve `reintentar=false`, `tipoError="error_versat_no_transitorio"` o indica rechazo de aplicación, lee primero `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente`. Corrige el registro en borrador existente, verifica la corrección y repite el procesamiento solo después. No crees otro registro para sustituirlo ni repitas `Aplicar` sin cambios.
 - Si una tool devuelve un error no temporal, muestra solo el `mensaje` de negocio disponible y pregunta por el dato faltante o invalido. No muestres cuerpos técnicos, `StackTrace`, `ExceptionType`, headers ni tokens.
 - Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
 - No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
@@ -44,6 +44,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - `debeDetenerse=true` o `accesoMcp=false`: no sigas. Explica bloqueo de acceso MCP.
 - `reintentar=true`: informa falla temporal. No digas que no hay datos. Reintenta solo despues de esperar `retryAfterSegundos` o unos segundos.
 - `reintentar=false` o `error_versat_no_transitorio`: el rechazo depende de los datos o de la regla aplicada por Versat. No reintentes sin modificar la solicitud.
+- `accionRequerida`: ejecuta la corrección indicada sobre el registro existente. Si también vienen `campoPendiente` o `herramientaSugerida`, úsalos antes de solicitar al usuario un id técnico.
 - `CodigoEstado=400` o mensaje de validacion: corrige el JSON o pregunta el dato faltante. No repitas la misma llamada sin cambiar nada.
 - Multiples coincidencias razonables: presenta 2 a 5 opciones con nombre y documento si existe; pide confirmacion antes de consultar detalles sensibles o escribir.
 - Respuesta vacia: di que no se encontraron datos con ese criterio y ofrece ampliar busqueda; no concluyas que el registro no existe si solo usaste un filtro estrecho.

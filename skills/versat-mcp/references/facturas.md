@@ -204,6 +204,9 @@ Reglas:
 3. Para `Desaplicar` o `Anular`, incluye motivo si el usuario lo dio; si el motivo es obligatorio y falta, pregunta.
 4. No cambies `Status` manualmente con update para aplicar, desaplicar o anular.
 5. Si hay varios documentos con el mismo numero, pide confirmacion.
+6. Si la respuesta incluye `accionRequerida`, `campoPendiente`, `herramientaSugerida` o `instruccionParaAgente`, corrige la misma factura en borrador y verifica el cambio antes de volver a procesarla.
+7. Ante “Informe la Cuenta”, resuelve la cuenta con la tool específica del recurso, actualiza `Cuenta_id` en la cabecera existente y vuelve a aplicar solo después de verificarla.
+8. Ante “Registre los detalles”, consulta los tipos y detalles del recurso, completa los detalles y subdetalles exigidos en el mismo borrador y vuelve a aplicar únicamente después de verificarlos. No crees otra factura para sustituirla.
 
 ## Resolucion de IDs
 
