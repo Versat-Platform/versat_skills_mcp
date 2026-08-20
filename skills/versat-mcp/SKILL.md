@@ -80,6 +80,7 @@ La única fuente oficial para instalar o actualizar esta skill es `https://githu
 - Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP aplica internamente el contexto autorizado para filtrar catalogos compatibles como cuentas, tributacion y operaciones.
 - Usuario pide detalles de una factura o recibo por id: usa la tool de detalle del mismo recurso y filtra por `Factura_id` o `Financ_id`.
 - Usuario pide crear cabecera mas detalles: usa la tool completa/orquestadora del recurso cuando exista; evita crear manualmente cabecera y detalles separados.
+- Usuario necesita contabilizar una factura compleja tomando antecedentes: usa `versat_buscar_ejemplos_contables_factura_*` del recurso con la operación ya resuelta; la tool recupera automáticamente facturas anteriores, clasificaciones y centros de costo. No copies fechas, importes, números, timbrados ni estados.
 
 ## Escrituras seguras
 

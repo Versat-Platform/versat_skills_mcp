@@ -51,6 +51,8 @@ Para `versat_buscar_timbrados`, el tipo de documento es obligatorio. Primero res
 
 Un timbrado solo esta disponible para una factura si existe un expedidor del timbrado con el mismo tipo de documento. Si falta `documentoTipoId`, no busques timbrados ni sugieras ids.
 
+En las búsquedas específicas de timbrado por factura, informa únicamente el contexto de la emisión: para `El Parcero`, entidad y emisión; para `La Empresa`, tipo de documento, unidad y emisión.
+
 ## Empresa actual
 
 Para consultas sobre "mi empresa", usa `versat_buscar_empresas`. La tool limita la consulta a la empresa autorizada; no la conviertas en una busqueda libre por nombre ni permitas elegir otra empresa.

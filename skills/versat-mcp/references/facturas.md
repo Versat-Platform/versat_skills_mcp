@@ -81,6 +81,14 @@ Flujo recomendado:
 
 Si la tool no devuelve paginacion, ordena los items recibidos por fecha/id antes de responder.
 
+Cuando una factura sea compleja y necesites una referencia contable anterior, usa la tool automática del mismo recurso:
+
+- AF31: `versat_buscar_ejemplos_contables_factura_financiero`
+- AI71: `versat_buscar_ejemplos_contables_factura_insumos`
+- AG91: `versat_buscar_ejemplos_contables_factura_granos`
+
+Informa la operación ya resuelta y, cuando estén disponibles, tipo de documento, entidad y moneda. La tool localiza las páginas recientes y recupera clasificaciones con centros de costo. Usa esos datos solo como referencia: vuelve a resolver catálogos vigentes y no copies fechas, importes, números, timbrados ni estados.
+
 ## Consultar detalles
 
 Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factura, filtra por el id padre:
@@ -139,7 +147,7 @@ Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no
 - Granos: `Factura_producto` para productos/granos; `Factura_remision` para remisiones; `Factura_cuota` para vencimientos; `Factura_flete` para flete; `Factura_clasificacion` para clasificación contable.
 - Financiero: `Factura_clasificacion` para cuenta/clasificación; `Factura_cuota` para vencimientos; `Factura_baja` para bajas; `Factura_retencion` para retenciones; `Factura_flete` para flete.
 
-Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera.
+Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera. Para centros de costo, lotes o devengamientos, incluye cada subdetalle en la propiedad `subdetalles` del detalle padre; la tool crea primero el padre e inyecta también su id.
 
 Si un producto de AI71 controla lote, crea primero `Factura_producto` y después `Factura_producto_lote` con el id del producto facturado. En el alta del subdetalle no envíes `Producto_lote_id`: Versat lo genera. Informa `Factura_producto_id`, `Producto_id`, `Lote_id` y `Cantidad`.
 
