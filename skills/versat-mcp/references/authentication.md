@@ -1,58 +1,40 @@
-# Autenticacion y acceso
+# Autenticación y acceso
 
-El MCP HTTP acepta una de estas formas:
+## Configurar la credencial
 
-```http
-X-Versat-Mcp-Token: <token-versat>
-```
-
-o:
+El MCP HTTP admite una de estas formas. Usa solo una por configuración:
 
 ```http
 Authorization: Bearer <token-versat>
 ```
 
-El token se procesa internamente por el MCP. No lo imprimas en respuestas finales ni lo guardes en archivos del repositorio.
+Si el cliente permite un encabezado personalizado, también puede enviar:
 
-Cuando el MCP esta detras de un proxy reverso, el proxy debe terminar TLS y enviar `X-Forwarded-Proto: https`. Una respuesta `426` indica que la solicitud llego por HTTP directo y debe repetirse por HTTPS, sin mostrar ni reutilizar el token en texto visible.
+```http
+X-Versat-Mcp-Token: <token-versat>
+```
 
-## Diagnostico rapido
+En el segundo encabezado, envía únicamente el token. Si el cliente pide el nombre de una variable de entorno, informa el nombre, no el valor secreto. Nunca pidas al usuario pegar credenciales en la conversación, ni las guardes en el repositorio o en ejemplos compartidos.
 
-`401` o `Auth required` desde MCP:
+## Distinguir el motivo del bloqueo
 
-- El cliente MCP no envio `X-Versat-Mcp-Token` ni `Authorization: Bearer`.
-- Corrige la configuracion del servidor MCP en Codex/Azure/cliente.
-- No intentes resolver entidades, catalogos ni facturas hasta corregir el header.
+| Respuesta | Interpretación y siguiente paso |
+| --- | --- |
+| `mcp_http_bearer_ausente_o_invalido`, `401` o `Auth required` del cliente | Falta una credencial utilizable o el cliente debe autenticarse. Revisa su configuración. |
+| `tipoError=acceso_mcp_denegado` o `estadoValidacionMcp=denegado` | El acceso MCP está denegado. Detén la operación e informa que se necesita habilitación. |
+| `estadoValidacionMcp=rechazado` | La autenticación no pudo validarse con esa credencial. Pide revisar su validez y permisos sin solicitar el secreto. |
+| `estadoValidacionMcp=indeterminado`, por ejemplo `validacion_acceso_mcp_timeout` | No se pudo determinar el acceso. Detén las tools de negocio y comunica una falla de validación; no afirmes que la empresa carece de permiso. |
+| `401/403` de una operación sin señal de denegación MCP | Puede ser autenticación o permiso para esa operación. Conserva el mensaje controlado y pide revisar el acceso correspondiente. |
+| `426` | Usa la URL HTTPS del MCP. En una instalación con proxy, el administrador debe revisar TLS y las direcciones de proxies confiables. |
 
-`403` con `tipoError="acceso_mcp_denegado"`, `accesoMcp=false` o `debeDetenerse=true`:
+`debeDetenerse=true` o `accesoMcp=false` siempre bloquean la continuación de las tools de negocio, incluso si la causa es temporal. La frase al usuario debe reflejar el motivo concreto; no equipares una validación indeterminada con una denegación confirmada.
 
-- La validacion de acceso devolvio `accesoMcp=false` o una señal equivalente.
-- Deten la operacion. No consultes ni modifiques datos.
-- Responde claramente: el token o empresa no tiene acceso al MCP de Versat.
+Para errores de disponibilidad sin bloqueo de acceso, aplica [Resultados y recuperación](resultados.md). Listar tools o leer la guía confirma descubrimiento, pero no prueba acceso a datos: una consulta exitosa como `versat_buscar_empresas` permite verificarlo sin escribir.
 
-`401/403` de una operación sin `acceso_mcp_denegado`:
+## Comunicar sin exponer credenciales
 
-- El MCP recibió el Bearer, pero la operación fue rechazada por autenticación o permisos de negocio.
-- Pide al usuario revisar/generar un token Versat valido.
+- Credencial ausente: “Falta configurar el token de acceso en el cliente MCP.”
+- Acceso denegado: “El token o la empresa no tiene acceso habilitado al MCP de Versat.”
+- Validación indeterminada: “No fue posible validar el acceso en este momento; la operación no puede continuar todavía.”
 
-## Orden de decision
-
-1. Si falta header o token, responde que el cliente MCP no envio credencial.
-2. Si `accesoMcp=false` o `debeDetenerse=true`, responde bloqueo de acceso MCP y detente.
-3. Si el error habla de permisos de negocio pero no de acceso MCP, informa que Versat rechazó la operación para ese token o permiso.
-4. Si `reintentar=true`, tratalo como falla temporal, no como problema de permisos.
-5. Si no puedes clasificar el error sin exponer detalle tecnico, responde que no fue posible validar el acceso y pide revisar configuracion o permisos.
-
-## Respuesta segura
-
-Usa mensajes simples:
-
-- "No fue posible usar el MCP de Versat porque falta configurar el token de acceso."
-- "El token o la empresa no tiene acceso habilitado al MCP de Versat."
-- "Versat rechazó la autenticación o los permisos para esta operación."
-
-No pegues headers, token parcial, stack trace, cuerpo tecnico completo, URLs con valores de filtros ni nombres o mensajes de excepciones.
-
-## Regla para agentes
-
-Cuando la tool indique falta de acceso MCP, no intentes resolver ids, buscar entidades ni repetir la misma llamada. La accion correcta es informar el bloqueo y pedir habilitacion de acceso MCP.
+No copies headers de autenticación, tokens parciales, cuerpos técnicos, nombres de excepciones ni URLs con valores de filtros.

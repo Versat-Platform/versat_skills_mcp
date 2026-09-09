@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.47",
+      "version": "1.2.48",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -18,17 +18,19 @@
         "references/catalogos.md",
         "references/entidades.md",
         "references/facturas.md",
-        "references/recibos.md"
+        "references/recibos.md",
+        "references/resultados.md"
       ],
       "sha256": {
-        "SKILL.md": "88f7ba4b370e98a758a81c66d75e954880e79d14bf59e5ef7bd65145290ca2e7",
-        "VERSION": "7d4629fd7ed22d5d1b25d253434eefb74c847f40622c78c538c278e93ac74c58",
+        "SKILL.md": "cf172f4baac61f091ef16487c451d68be62550e5a95fd4e949a6c4f324f3a723",
+        "VERSION": "6e7bddb0088a83e08b0cbf200d0d7673dbb44a869529cc21b274b319cec29c90",
         "agents/openai.yaml": "6427a57175b9e8bd0b3c73097c301c8e01a493d461cf37ce4a712926b702713d",
-        "references/authentication.md": "69c08321a8734152390d1fef527f3e0197a7d1a1548f4b560bc48ff8d31df113",
-        "references/catalogos.md": "b7aeda4aa89ef24dc9948ea935e7d358d238861e96a95d31e887a139965c7003",
-        "references/entidades.md": "bb2285e78de95b560dd08a2e526fd1a5cc06829d7ceb254d2c379c2ec631c96c",
-        "references/facturas.md": "026f5bae7da8455a8faff2363335a3ada7b3ab286be600274b9b3d25179d6c1d",
-        "references/recibos.md": "5b1c89dad4735698d368814ed02eac48faf9c4ff12f47472095f8e5d800acc14"
+        "references/authentication.md": "12283fb3fa0f5295ca64b0aa8b3218c2c30c7b072ea311bebf5a58a8d1318b11",
+        "references/catalogos.md": "8d97a6c60f4cb40836cf5661e56dfc0c7f7f6f5354145b130408ef7df68ee966",
+        "references/entidades.md": "1a8cebeb37132c93b31efabb5aeb2fa5436efc9161068c63ac311f0ef71fe8e2",
+        "references/facturas.md": "f39c7a075b2b6ad11bade5adb6ee0d3805a2f59d6d52416961cb6c89927406ec",
+        "references/recibos.md": "ea1628c5bae8c7f505a85a9ef18b9a04b5933be289991b0e475f85123f84b8bf",
+        "references/resultados.md": "bf3c4a28973d835e8584ba9dcc827df1f1c2945df52901c2b542b9af54413a9b"
       }
     }
   ]

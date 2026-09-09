@@ -1,6 +1,6 @@
 # Recibos y transacciones AF51
 
-En pruebas de inserción, aplica el recibo al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. No apliques altas parciales.
+En pruebas de inserción autorizadas, aplica el recibo al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. Fuera de esas pruebas, procesa solo si la solicitud incluye esa acción. No apliques altas parciales.
 
 ## Tools
 
@@ -10,19 +10,13 @@ En pruebas de inserción, aplica el recibo al finalizar únicamente si la cabece
 - `versat_actualizar_recibo_transaccion`
 - `versat_procesar_recibos_transacciones`
 - `versat_agregar_detalle_recibo_transaccion`
+- `versat_actualizar_detalle_recibo_transaccion`
 - `versat_consultar_detalle_recibo_transaccion`
 - `versat_listar_detalles_recibos_transacciones`
 
 ## Recientes
 
-Versat pagina de antiguo a nuevo. Para ultimos recibos:
-
-1. Consulta `pagina=0` con pocos registros para obtener `infoPaginacion.totalPages`.
-2. Calcula la ultima pagina como `max(infoPaginacion.totalPages - 1, 0)`.
-3. Consulta esa ultima pagina.
-4. Ordena por `Fecha`, `Fecha_doc` e `id` descendente.
-
-Si la tool no devuelve paginacion, ordena los registros recibidos por fecha/id antes de responder. No asumas que el primer registro es el mas reciente.
+Sigue [Buscar los registros más recientes](resultados.md#buscar-los-registros-más-recientes). Mantén filtros y tamaño de página; si falta un total válido, informa el alcance de los registros recuperados sin inventar la última página.
 
 ## Crear recibo
 
@@ -57,7 +51,7 @@ Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La
 - Unidad: `versat_buscar_unidades`
 - Entidad: lee `references/entidades.md` y usa `versat_listar_entidades` con `Descripcion_cb`; no descartes coincidencias por espacios, puntuacion, orden de nombres o abreviaturas como `S.A.`.
 - Moneda: `versat_buscar_monedas`
-- Cuenta: `versat_buscar_cuentas`
+- Otras cuentas contables: `versat_buscar_cuentas`, solo cuando el contrato no indique una búsqueda específica.
 - Condicion de pago: `versat_buscar_condiciones_pago`
 - Zafra: `versat_buscar_zafras`
 - Título o flujo de caja para `Financ_baja`: `versat_buscar_flujos_caja_baja_titulos_recibo`, informando la entidad del recibo o transacción. Use el resultado como `Flujo_caja_id`.
@@ -96,25 +90,25 @@ Detalles AF51:
 - `Financ_caja_cuota`
 - `Financ_factura`
 
-Consulta detalles con `Financ_id`.
+Consulta los detalles directos con `Financ_id`. Para `Financ_caja_cuota`, usa `Financ_caja_id` del movimiento de caja padre, no el ID del recibo.
 
 Para agregar o consultar detalles:
 
 1. Confirma el `id` del recibo/transaccion padre.
-2. Usa `Financ_id` como filtro o relacion.
+2. Usa el campo de relación del contrato: `Financ_id` para detalles directos o `Financ_caja_id` para sus cuotas.
 3. Si no sabes campos del detalle, llama la tool sin JSON para obtener el contrato.
 4. Si hay varias clases posibles, pregunta cual corresponde al comprobante.
 
 Antes de aplicar, si la condición del movimiento de caja exige cuotas, crea `Financ_caja_cuota`. La suma y cantidad de cuotas deben corresponder al `Valor` y a la `Condicion_id` del `Financ_caja`.
 
-Antes de aplicar un AF51 con `Financ_factura`, toma cada `resultado.cuerpo` devuelto para ese detalle como `Factura_id` y completa la factura no provisionada con las tools de detalles AF31. El recibo solo está listo para aplicar cuando esas facturas tienen sus clasificaciones, cuotas y subdetalles requeridos.
+Antes de aplicar un AF51 con `Financ_factura`, extrae el ID generado de cada `resultado.cuerpo` devuelto para ese detalle y úsalo como `Factura_id`. Completa la factura no provisionada con las tools de detalles AF31; no envíes el objeto de respuesta completo como ID. El recibo solo está listo para aplicar cuando esas facturas tienen sus clasificaciones, cuotas y subdetalles requeridos.
 
 Usa solamente campos admitidos por el contrato de AF51 o del detalle seleccionado. La tool rechaza un `filtroCampo` inventado o perteneciente a otro recurso.
 
 ## Errores y recuperacion
 
-- `reintentar=true`: informa falla temporal y no lo trates como ausencia de recibos.
+- Clasifica las señales y los reintentos según [Resultados y recuperación](resultados.md). Un fallo temporal no demuestra ausencia de recibos ni que una escritura haya sido revertida.
 - Error por campo obligatorio: pregunta solo ese dato.
 - Error por entidad ambigua: resuelve entidad con la referencia de entidades antes de insistir.
-- Exito parcial en tool completa: informa cabecera creada, detalles creados y etapa fallida; verifica antes de repetir.
+- Éxito parcial: conserva los IDs conocidos, consulta cabecera y detalles y completa únicamente lo que falte en ese recibo. No repitas la tool completa ni apliques mientras falten cuotas o detalles de facturas no provisionadas.
 - Si el usuario pide anular o desaplicar sin motivo y la tool lo exige, pregunta el motivo.

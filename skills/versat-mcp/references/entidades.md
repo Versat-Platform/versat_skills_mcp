@@ -87,7 +87,7 @@ Antes de concluir que no existe una entidad, aplica esta estrategia:
 2. Si no hay resultado o hay muchas coincidencias debiles, repite con el termino distintivo mas fuerte. Ejemplo: de `GIGANET S.A.` usa tambien `GIGANET`; de `LA SEMILLA - ESTANCIA` usa tambien `LA SEMILLA` y `ESTANCIA`.
 3. Ignora diferencias de mayusculas, acentos, puntos, comas, guiones y espacios dobles al comparar candidatos.
 4. Trata abreviaturas societarias como equivalentes: `S.A.`, `SA`, `SOCIEDAD ANONIMA`, `SOCIEDAD ANÓNIMA` y `SOCIEDADE ANONIMA`.
-5. Para personas, prueba orden normal e invertido: `Nombre Apellido`, `Apellido, Nombre` y `Apellido Nombre`.
+5. Para personas, compara orden normal e invertido. Si `criterioBusqueda="nombre_flexible"`, la tool ya probó esas variaciones; no repitas llamadas equivalentes. Amplía con un dato distintivo solo si los resultados no resuelven la solicitud.
 6. Si aparece una coincidencia clara por tokens significativos, usa esa entidad; si aparecen varias razonables, muestra opciones con nombre y documento si existe, y pide confirmacion.
 
 Cuando `versat_listar_entidades` devuelva busqueda flexible, usa estos campos para decidir:
@@ -158,7 +158,7 @@ Para actualizar:
 1. Busca o consulta la entidad actual para confirmar el `id`.
 2. Usa `versat_actualizar_entidad` con `id` y `entidadJson`.
 3. No cambies campos no solicitados si no tienes el registro base.
-4. Si el cambio puede afectar datos sensibles, resume el cambio y pide confirmacion antes de ejecutar.
+4. Mantén el cambio dentro de lo solicitado y de la autorización existente. Pregunta solo si falta un dato, hay ambigüedad o la acción necesaria excede lo autorizado.
 
 ## Detalles tecnicos
 
@@ -191,8 +191,8 @@ Detalles conocidos:
 
 ## Errores y ambiguedad
 
-- Si la tool devuelve `reintentar=true`, espera y reintenta una vez; no digas que la entidad no existe.
-- Si la tool devuelve `reintentar=false` o `error_versat_no_transitorio`, no repitas la misma insercion; usa el mensaje controlado para pedir correccion de datos.
+- Sigue [Resultados y recuperación](resultados.md) para errores y reintentos. En consultas temporales, espera antes de reintentar; en altas o cambios con resultado incierto, verifica la entidad antes de repetir.
+- Si hay rechazo de negocio con corrección indicada, resuélvela sobre la entidad existente. Un error interno sin corrección no justifica inventar nuevos datos.
 - Si la tool devuelve una validacion de campo obligatorio, pregunta solo ese campo.
 - Si una busqueda devuelve cero resultados con nombre largo, repite con el apellido, razon social principal o palabra mas distintiva.
 - Si el usuario pide datos sensibles de una entidad ambigua, no muestres detalles de candidatos; pide elegir primero.

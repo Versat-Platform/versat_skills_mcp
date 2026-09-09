@@ -27,7 +27,7 @@ Usa esta referencia para resolver ids antes de crear o actualizar documentos. No
 
 ## Flujo seguro
 
-1. Identifica el catalogo requerido por el contrato de la tool de negocio.
+1. Identifica el catálogo requerido por el contrato del campo y recurso. Usa su tool específica cuando exista; una cuenta válida en un catálogo general puede no servir para una cabecera, clasificación contable o movimiento de caja.
 2. Busca por el nombre informado por el usuario.
 3. Si existe una coincidencia clara, usa su id sin pedirlo al usuario.
 4. Si hay varias coincidencias razonables, muestra de dos a cinco opciones con nombres amigables y pide confirmacion.
@@ -62,3 +62,9 @@ Para consultas sobre "mi empresa", usa `versat_buscar_empresas`. La tool limita 
 ## Catalogos dependientes del contexto
 
 Usa las tools publicas normalmente para cuentas, tributacion, operaciones y otros catalogos dependientes de empresa o modelo. El MCP aplica internamente el contexto autorizado.
+
+## Cotizaciones de monedas
+
+Si falta la cotización del día, consulta `versat_buscar_cotizaciones_monedas` con fecha y tipo. Resuelve el tipo con `versat_buscar_tipos_cotizacion`; si no existe cotización, pide los valores de compra y venta y propone `versat_agregar_cotizacion_moneda`. No inventes importes ni crees una cotización sin autorización.
+
+Ante errores o resultados ambiguos, aplica [Resultados y recuperación](resultados.md). Si no se pudo validar empresa o modelo, no sustituyas el contexto autorizado por un ID elegido por el usuario.

@@ -1,112 +1,53 @@
 ---
 name: versat-mcp
-description: "Usar cuando se trabaja con el servidor MCP Versat: consultar, listar, crear, actualizar o procesar facturas, recibos, entidades y detalles; resolver ids de catalogos; diagnosticar autenticacion, permisos, indisponibilidad temporal y respuestas de tools."
+description: "Consultar y operar entidades, facturas, recibos y catálogos mediante las tools del MCP Versat; interpretar sus resultados y resolver problemas de acceso. Usar para tareas de negocio con Versat, no para desarrollo genérico del servidor."
 ---
 
 # Versat MCP
 
-Usa esta skill cuando la tarea involucre el servidor MCP Versat o recursos de negocio de Versat. Si dudas entre usar esta skill o razonar desde cero, usa esta skill.
+Esta skill orienta el uso de las tools de Versat. El servidor es autosuficiente: prevalecen sus validaciones, el contrato vigente de cada tool y la guía de `versat_obtener_guia_uso`, también disponible como resource `versat://guia/uso` y prompt `versat_usar_mcp`. Una skill ausente o desactualizada no bloquea una tarea de negocio.
 
-Esta skill es una ayuda opcional. El MCP es autosuficiente y sus validaciones son autoritativas. Si la skill no está disponible o parece desactualizada, usa `versat_obtener_guia_uso` o el resource `versat://guia/uso`; no bloquees la operación para instalar o actualizar la skill.
+## Elegir el flujo
 
-Cuando el usuario pida instalar o actualizar las skills de Versat, llama `versat_sincronizar_skills`. Guarda los archivos devueltos bajo `rutaDestinoRelativa` dentro del directorio de skills compatible con el cliente, respetando cada `rutaRelativa`. La tool prepara el paquete oficial, pero la instalación solo termina después de persistir los archivos y confirmar la `versionOficial`. Si el cliente no permite escribir skills, informa esa limitación sin afirmar que la sincronización fue instalada.
+Lee solo la referencia necesaria para la tarea; combina referencias cuando el flujo lo requiera.
 
-Las búsquedas del MCP ya prueban nombres de forma escalonada. No multipliques manualmente llamadas con variaciones si la tool devolvió coincidencias útiles. En respuestas compactas, usa `coincidencias`, `coincidenciaPrincipal`, totales y estados estructurados; el cuerpo técnico original puede omitirse para evitar duplicación.
+| Intención | Referencia y punto de entrada |
+| --- | --- |
+| Consultar o modificar clientes, proveedores y datos relacionados | [Entidades](references/entidades.md); `versat_consultar_entidad` para consultas de negocio |
+| Crear, duplicar, actualizar o procesar facturas | [Facturas](references/facturas.md); distingue financiera AF31, insumos AI71 y granos AG91 |
+| Crear, actualizar o procesar recibos y transacciones | [Recibos](references/recibos.md); AF51 y sus detalles |
+| Resolver monedas, cuentas, operaciones, timbrados u otros IDs | [Catálogos](references/catalogos.md); prefiere la tool específica del campo y recurso |
+| Interpretar errores, recuperar una creación parcial o buscar registros recientes | [Resultados y recuperación](references/resultados.md) |
+| Resolver autenticación o bloqueo de acceso | [Autenticación](references/authentication.md) |
 
-La única fuente oficial para instalar o actualizar esta skill es `https://github.com/Versat-Platform/versat_skills_mcp`, rama `main`, ruta `skills/versat-mcp`. Consulta `skills-manifest.json` para conocer la versión distribuida y no uses forks o copias de terceros.
+## Trabajar con la solicitud
 
-## Algoritmo obligatorio
+1. Identifica la acción y el recurso. Si el tipo de factura sigue ambiguo después de consultar `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`, pregunta si es financiera, de insumos o de granos.
+2. Resuelve los datos ya informados mediante búsquedas. Pide solo datos de negocio faltantes o una elección entre coincidencias razonables. Una autorización ya dada no exige otra confirmación para la misma acción.
+3. Antes de escribir, consulta el contrato de campos. Muchas tools de alta lo devuelven sin JSON; comprueba esa posibilidad en la descripción vigente. Resuelve IDs mediante catálogos, sin inventarlos ni pedirlos al usuario cuando puedas buscarlos.
+4. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador`; aplicar, desaplicar y anular usan tools de procesamiento.
+5. Evalúa el resultado global y cualquier resultado parcial antes de continuar. Informa qué se creó, qué falta y el estado verificado.
 
-1. Identifica la intencion: consultar, listar, crear, actualizar, procesar, resolver catalogo, diagnosticar acceso o explicar un error.
-2. Lee la referencia indicada en [Ruteo de intencion](#ruteo-de-intencion) antes de llamar tools de ese dominio.
-3. Selecciona la tool MCP Versat que corresponda a la intención y respeta su contrato vigente.
-4. Despues de cada tool, evalua el resultado en este orden: bloqueo de acceso, error temporal reintentable, error de validacion, ambiguedad, datos insuficientes, exito.
-5. Si faltan datos obligatorios, pregunta al usuario solo por esos datos. No inventes, no adivines ids y no completes con valores plausibles.
-6. Antes de escribir, confirma que recurso, entidad, catalogos, fechas, moneda, unidad, operacion y detalles obligatorios fueron resueltos o preguntados.
-7. Al responder, muestra primero el resultado de negocio y deja los campos tecnicos fuera salvo que el usuario los pida.
+## Decisiones que cambian el flujo
 
-## Reglas de ejecucion rapida
+- **Acceso bloqueado:** `debeDetenerse=true` o `accesoMcp=false` impiden continuar con tools de negocio. Usa `estadoValidacionMcp` y el código para distinguir acceso denegado, autenticación rechazada y validación indeterminada; no atribuyas falta de permiso a un timeout.
+- **Reintentos:** `reintentar=false` impide repetir la misma llamada sin cambios. El prefijo `servicio_versat_` por sí solo no significa fallo temporal. Con `reintentar=true`, espera el plazo indicado; en escrituras, verifica primero si hubo registros o cambios ya confirmados. Aplica [Resultados y recuperación](references/resultados.md).
+- **Corrección indicada:** usa `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente` sobre el borrador existente. Verifica la corrección antes de repetir `Aplicar`; no crees un sustituto.
+- **Búsquedas:** las tools ya intentan coincidencias flexibles. Usa `coincidencias`, `coincidenciaPrincipal` y totales; no multipliques variantes si hay resultados útiles. Pregunta únicamente cuando la ambigüedad afecte a la acción.
+- **Recientes:** la página 0 contiene registros antiguos. Mantén filtros y tamaño de página al usar `totalPages`; si falta ese dato, no inventes la última página ni presentes una muestra como el conjunto completo.
+- **RUC:** consulta `versat_buscar_rucs` y usa el ID devuelto como `Ruc_id` en BA31. `Ruc_uk` no es un filtro de entidades.
+- **Mi empresa:** usa `versat_buscar_empresas`; OX01 es de solo lectura y corresponde exclusivamente a la empresa autorizada. No solicites otra empresa o modelo para sustituir ese contexto.
 
-- Trata las tools MCP como la interfaz completa de Versat y respeta sus contratos públicos.
-- Nunca inventes ids. Resuelve entidades, monedas, unidades, documentos, operaciones, productos y demas foreign keys con tools de busqueda antes de escribir.
-- Si una respuesta trae `debeDetenerse=true`, `tipoError="acceso_mcp_denegado"` o `accesoMcp=false`, detente. No llames mas tools de negocio y responde que el token o empresa no tiene acceso al MCP de Versat.
-- Si una tool devuelve `401`, `Auth required` o falta de Bearer, trata el problema como configuracion de autenticacion del cliente MCP. No confundas eso con falta de permiso de negocio.
-- Si una tool devuelve `reintentar=true` o un código `servicio_versat_*`, explica al usuario que el servicio Versat tuvo una indisponibilidad temporal. No lo trates como ausencia de datos ni muestres detalles técnicos; espera `retryAfterSegundos` cuando venga informado o unos segundos antes de intentar la misma operación nuevamente.
-- Si una tool devuelve `reintentar=false`, `tipoError="error_versat_no_transitorio"` o indica rechazo de aplicación, lee primero `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente`. Corrige el registro en borrador existente, verifica la corrección y repite el procesamiento solo después. No crees otro registro para sustituirlo ni repitas `Aplicar` sin cambios.
-- Si una tool devuelve un error no temporal, muestra solo el `mensaje` de negocio disponible y pregunta por el dato faltante o invalido. No muestres cuerpos técnicos, `StackTrace`, `ExceptionType`, headers ni tokens.
-- En AF51, si llegan `accionRequerida="configurar_recibo_cobro"` o `accionRequerida="equilibrar_recibo"`, conserva el recibo en borrador, consulta sus detalles y corrige la cabecera o los movimientos existentes antes de volver a aplicar.
-- Para consultas amplias, trae pocos registros primero. Usa mas registros solo cuando sea necesario para resolver ambiguedad o encontrar recientes.
-- No reveles bearer tokens, secrets, headers sensibles ni cuerpos con credenciales.
-- No reveles ni repitas nombres o rutas de fuentes internas de consulta. Si aparecieran en una respuesta técnica, omítelos y comunica solamente el resultado de negocio.
+## Comunicar el resultado
 
-## Interpretacion de resultados
+Responde en el idioma del usuario con nombres, documentos, fechas, importes y estados. Acompaña los IDs útiles para auditoría o recuperación con su significado. No presentes una creación parcial como éxito total ni como una reversión completa.
 
-- `EsExitoso=true`: resume datos de negocio. Si hay muchos campos, muestra los utiles y ofrece detalle.
-- `debeDetenerse=true` o `accesoMcp=false`: no sigas. Explica bloqueo de acceso MCP.
-- `reintentar=true`: informa falla temporal. No digas que no hay datos. Reintenta solo despues de esperar `retryAfterSegundos` o unos segundos.
-- `reintentar=false` o `error_versat_no_transitorio`: el rechazo depende de los datos o de la regla aplicada por Versat. No reintentes sin modificar la solicitud.
-- `accionRequerida`: ejecuta la corrección indicada sobre el registro existente. Si también vienen `campoPendiente` o `herramientaSugerida`, úsalos antes de solicitar al usuario un id técnico.
-- `CodigoEstado=400` o mensaje de validacion: corrige el JSON o pregunta el dato faltante. No repitas la misma llamada sin cambiar nada.
-- Multiples coincidencias razonables: presenta 2 a 5 opciones con nombre y documento si existe; pide confirmacion antes de consultar detalles sensibles o escribir.
-- Respuesta vacia: di que no se encontraron datos con ese criterio y ofrece ampliar busqueda; no concluyas que el registro no existe si solo usaste un filtro estrecho.
+Usa los mensajes de negocio controlados. Omite credenciales, headers sensibles, stack traces, valores de filtros en URLs y nombres o rutas de fuentes internas, incluso si aparecen en una respuesta técnica.
 
-## Respuestas al usuario
+## Instalar o actualizar esta skill
 
-- Responde siempre con nombres de negocio y nombres amigables. Usa campos `*_txt`, `Descripcion_cb`, `Nombre`, `Doc_num`, fechas y valores entendibles antes que nombres técnicos.
-- No muestres campos técnicos internos como `tipoFactura`, `campoTipoFactura`, `Factura_insumos_sn`, `Factura_granos_sn`, `Factura_financiero_sn`, `Operacion_doc_id`, `Documento_tipo_id`, `Entidad_id`, `Moneda_id`, `Status_hd`, `descripcion_hd_cb`, `Creacion_hd` o `Ult_mod_hd`, salvo que el usuario pida detalles técnicos.
-- Si necesitas mencionar una validación técnica, tradúcela a lenguaje de negocio. Ejemplo: en vez de “tipoFactura=AI71 y campoTipoFactura=Factura_insumos_sn”, responde “la operación fue validada como habilitada para facturas de insumos”.
-- Cuando muestres un id por auditoría o confirmación, acompáñalo con el nombre amigable. Ejemplo: “Operación: COMPRAS IMPORTACION (id 1381)”.
-- Si la tool devuelve datos técnicos junto con datos de negocio, resume primero lo relevante para el usuario y ofrece mostrar el detalle técnico solo si lo pide.
+La fuente oficial es [Versat MCP Skills](https://github.com/Versat-Platform/versat_skills_mcp), rama `main`, manifiesto `skills-manifest.json`, ruta `skills/versat-mcp`.
 
-## Ruteo de intencion
+Cuando el usuario pida instalar o actualizar la versión distribuida, usa `versat_sincronizar_skills` e informa la versión local cuando esté disponible. Si devuelve archivos, persiste el paquete completo bajo `rutaDestinoRelativa` en el directorio de skills compatible con el cliente, respetando cada `rutaRelativa`. Comprueba la versión y los hashes suministrados. La descarga o preparación del paquete no equivale a una instalación; confirma `versionOficial` solo después de verificar los archivos escritos.
 
-- Datos, direccion, contactos, timbrados, codeudores o resumen de una persona/empresa: lee [references/entidades.md](references/entidades.md) y usa primero `versat_consultar_entidad`.
-- Crear, duplicar, listar, procesar o inspeccionar facturas: lee [references/facturas.md](references/facturas.md).
-- Crear, actualizar, listar, aplicar, desaplicar o anular recibos/transacciones: lee [references/recibos.md](references/recibos.md).
-- Resolver ids de catalogos y ayudas auxiliares como monedas, tipos de cotizacion, unidades, tipos de documento, operaciones, condiciones de pago, cuentas, depositos, timbrados, zafras, proyectos, tributacion, actividades, centros de costo, empresas, RUCs, tipos de factura y tipos de negociacion: lee [references/catalogos.md](references/catalogos.md).
-- Problemas de token, headers, autenticacion del cliente MCP o acceso denegado: lee [references/authentication.md](references/authentication.md).
-
-## Decisiones comunes
-
-- Usuario pide algo ambiguo: pregunta una sola aclaracion concreta o usa una tool de sugerencia/listado si existe.
-- Usuario dice "quiero cadastrar/criar uma fatura" sin tipo: llama `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`; si sigue ambiguo, pregunta si es `financiera`, `insumos` o `granos`.
-- Usuario quiere insertar una factura: lee `references/facturas.md` y usa el flujo de alta guiada. Pregunta en lenguaje de negocio, no por nombres técnicos de campos; resuelve ids con tools.
-- Usuario recibe error de factura por falta de cotizacion del dia: busca en AF01 con `versat_buscar_cotizaciones_monedas`; si no existe, resuelve el tipo con `versat_buscar_tipos_cotizacion`, pide `Compra` y `Venta`, y sugiere `versat_agregar_cotizacion_moneda`.
-- Usuario pide "ultima", "mais recente" o "ultimas": no uses `pagina=0` como reciente. Versat pagina de antiguo a nuevo. Usa `pagina=0` solo para obtener `infoPaginacion.totalPages`, luego pide `totalPages - 1` como ultima pagina y ordena por `Fecha` e `id` descendente.
-- Usuario informa nombre de entidad: lee `references/entidades.md`, busca con `filtroCampo="Descripcion_cb"` y `filtroValor=<nombre>`. Normaliza mentalmente espacios, puntuacion y abreviaturas como `S.A.` antes de decidir que no existe. Si hay varias coincidencias fuertes, pregunta cual usar.
-- Usuario busca una entidad por numero de RUC: nunca filtres BA31 por `Ruc_uk`. Usa `versat_buscar_rucs`, toma el `id` del RUC y llama `versat_listar_entidades` o `versat_consultar_entidad` con `filtroCampo="Ruc_id"`.
-- Usuario crea una entidad: si no indicó documento, pregunta si usará `RUC` o `CI`. Para `RUC`, resuelve primero `Ruc_id` con `versat_buscar_rucs`; para `CI`, usa `CI_uk`.
-- Usuario pide “mi empresa”, datos de la empresa o configuracion OX01: usa `versat_buscar_empresas`. OX01 es solo lectura y la tool limita la consulta a la empresa autorizada; no hagas una busqueda libre por nombre.
-- Para datos con `Modelo_id`, usa siempre las tools MCP normales. El MCP aplica internamente el contexto autorizado para filtrar catalogos compatibles como cuentas, tributacion y operaciones.
-- Usuario pide detalles de una factura o recibo por id: usa la tool de detalle del mismo recurso y filtra por `Factura_id` o `Financ_id`.
-- Usuario pide crear cabecera mas detalles: usa la tool completa/orquestadora del recurso cuando exista; evita crear manualmente cabecera y detalles separados.
-- Usuario necesita contabilizar una factura compleja tomando antecedentes: usa `versat_buscar_ejemplos_contables_factura_*` del recurso con la operación ya resuelta; la tool recupera automáticamente facturas anteriores, clasificaciones y centros de costo. No copies fechas, importes, números, timbrados ni estados.
-
-## Escrituras seguras
-
-Antes de escribir:
-
-- Identifica el recurso correcto.
-- Si faltan campos obligatorios, llama la tool de alta sin JSON para obtener el contrato de campos.
-- Las altas rechazan localmente JSON que no sea un objeto y campos obligatorios sin valor antes de escribir. Ante `json_alta_invalido` o `campos_obligatorios_alta_faltantes`, corrige únicamente el cuerpo indicado y no repitas la misma solicitud.
-- Resuelve todas las foreign keys obligatorias con tools de catalogo.
-- Construye JSON con nombres exactos de campos Versat.
-- Para registros con `Status`, deja que el MCP fuerce `Borrador`; no intentes crear documentos como `Aplicado` o `Anulado`.
-- Si el usuario mando imagen/PDF/texto con cabecera y lineas, usa la tool completa del recurso cuando exista.
-- Si hay duda entre dos ids o dos operaciones, pregunta antes de escribir.
-
-Despues de escribir:
-
-- Informa ids creados y etapas completadas.
-- Si hubo exito parcial, informa cabecera creada, detalles creados y etapa que fallo.
-- Valida consultando el registro o detalle creado cuando sea util y barato.
-- No reintentes a ciegas. Reintenta solo si corregiste un dato concreto indicado por la tool o si la respuesta fue marcada como temporal con `reintentar=true`.
-
-## Prohibiciones criticas
-
-- No presupongas ni expongas la arquitectura interna de Versat.
-- No pedir ids tecnicos al usuario si existe una tool para buscarlos.
-- No usar `pagina=0` como sinonimo de ultimo o reciente.
-- No crear documentos como `Aplicado` o `Anulado`; crear en borrador y procesar con tool especifica.
-- No modificar campos que el usuario no pidio cambiar.
-- No continuar despues de un bloqueo de acceso MCP.
+Si el cliente no permite escribir skills, informa esa limitación y continúa las tareas de negocio con la guía MCP. Mejorar el contenido fuente de la skill es una tarea de mantenimiento del repositorio oficial; no la confundas con instalar la versión publicada.

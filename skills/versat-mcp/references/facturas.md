@@ -2,9 +2,9 @@
 
 Usa estas reglas para listar, inspeccionar, crear, actualizar, duplicar o procesar facturas en Versat MCP.
 
-Antes de definir filtros para una view, consúltala sin filtros. Usa únicamente nombres de campos presentes en los registros devueltos y elimina cualquier filtro que la view no exponga.
+Usa los filtros publicados por la tool específica del recurso. No deduzcas filtros nuevos de campos presentes en una respuesta ni consultes fuentes internas.
 
-En pruebas de inserción, aplica la factura al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. No apliques altas parciales.
+En pruebas de inserción autorizadas, aplica la factura al finalizar únicamente si la cabecera y todos sus detalles fueron creados correctamente. Fuera de esas pruebas, procesa solo si la solicitud del usuario incluye esa acción. No apliques altas parciales.
 
 ## Indice
 
@@ -69,17 +69,7 @@ No uses palabras sueltas como unica evidencia. Ejemplos:
 
 ## Registros recientes
 
-Versat pagina de antiguo a nuevo. No trates `pagina=0` como reciente.
-
-Flujo recomendado:
-
-1. Consulta con `pagina=0` y pocos registros para obtener `infoPaginacion.totalPages`.
-2. Calcula la ultima pagina como `max(infoPaginacion.totalPages - 1, 0)`.
-3. Consulta esa ultima pagina con un tamano suficiente.
-4. Ordena items por `Fecha`, `Fecha_doc`, `Creacion_hd` o `id` descendente segun los campos disponibles.
-5. Devuelve la cantidad pedida.
-
-Si la tool no devuelve paginacion, ordena los items recibidos por fecha/id antes de responder.
+Sigue [Buscar los registros más recientes](resultados.md#buscar-los-registros-más-recientes): conserva filtros y tamaño de página al calcular la última página, y no interpretes metadatos nulos como cero. Ordenar una muestra no demuestra que contenga las últimas facturas del conjunto.
 
 Cuando una factura sea compleja y necesites una referencia contable anterior, usa la tool automática del mismo recurso:
 
@@ -94,7 +84,7 @@ Informa la operación ya resuelta y, cuando estén disponibles, tipo de document
 Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factura, filtra por el id padre:
 
 ```json
-{"detalle":"Factura_producto","filtroCampo":"Factura_id","filtroValor":"123","pagina":1,"registrosPorPagina":100}
+{"detalle":"Factura_producto","filtroCampo":"Factura_id","filtroValor":"123","pagina":0,"registrosPorPagina":100}
 ```
 
 Usa la tool de detalle del mismo recurso de la factura. No mezcles AI71, AF31 y AG91.
@@ -261,7 +251,7 @@ Reglas:
 - Otras cuentas contables: `versat_buscar_cuentas`
 - Unidad: `versat_buscar_unidades`
 - Deposito: `versat_buscar_depositos`
-- Timbrado general: `versat_buscar_timbrados` informando siempre `documentoTipoId`. Para las tools específicas de factura, la view usa entidad y emisión cuando emite `El Parcero`, o tipo de documento, unidad y emisión cuando emite `La Empresa`. No uses un timbrado si no existe una coincidencia compatible.
+- Timbrado general: `versat_buscar_timbrados` informando siempre `documentoTipoId`. Para las tools específicas de factura, la consulta requiere entidad y emisión cuando emite `El Parcero`, o tipo de documento, unidad y emisión cuando emite `La Empresa`. No uses un timbrado si no existe una coincidencia compatible.
 - Zafra: `versat_buscar_zafras`
 - Proyecto: `versat_buscar_proyectos`
 - Tributacion: `versat_buscar_tipos_tributacion`
@@ -277,10 +267,10 @@ No digas al usuario “tipoFactura=AI71” ni “campoTipoFactura=Factura_insumo
 
 ## Errores y recuperacion
 
-- `reintentar=true`: informa falla temporal, espera y reintenta la misma operacion si el usuario desea continuar.
+- Para clasificar errores y decidir un reintento, sigue [Resultados y recuperación](resultados.md). `reintentar=false` tiene prioridad y un código `servicio_versat_*` no basta para repetir una operación.
 - Error por campo obligatorio: pregunta solo ese campo y vuelve a intentar con el JSON corregido.
 - Error por operacion no habilitada: busca otra operacion valida para el mismo tipo de documento y tipo de factura; no inventes `Operacion_doc_id`.
 - Error por falta de cotizacion del dia: usa `versat_buscar_cotizaciones_monedas` con la fecha del documento y el tipo de cotizacion. Si no existe, confirma `Compra` y `Venta` con el usuario y sugiere crearla con `versat_agregar_cotizacion_moneda`.
 - Error por entidad ambigua: vuelve a `references/entidades.md` y pide confirmacion.
-- Exito parcial en tool completa: informa cabecera creada, detalles creados y detalle que fallo; no repitas todo sin verificar lo que ya fue creado.
+- Éxito parcial: conserva la cabecera, los detalles y subdetalles confirmados. Consulta los registros existentes y retoma únicamente lo faltante según [Recuperar una escritura por etapas](resultados.md#recuperar-una-escritura-por-etapas); no repitas la tool completa.
 - Respuesta vacia al buscar recientes: revisa paginacion antes de decir que no hay facturas.
