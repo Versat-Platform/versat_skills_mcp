@@ -137,9 +137,13 @@ Cuando el usuario envie una factura para ser leida desde imagen, PDF o texto, no
 - Granos: `Factura_producto` para productos/granos; `Factura_remision` para remisiones; `Factura_cuota` para vencimientos; `Factura_flete` para flete; `Factura_clasificacion` para clasificación contable.
 - Financiero: `Factura_clasificacion` para cuenta/clasificación; `Factura_cuota` para vencimientos; `Factura_baja` para bajas; `Factura_retencion` para retenciones; `Factura_flete` para flete.
 
-Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera. Para centros de costo, lotes o devengamientos, incluye cada subdetalle en la propiedad `subdetalles` del detalle padre; la tool crea primero el padre e inyecta también su id.
+Si hay cabecera y detalles, usa `versat_agregar_factura_completa_*`. La tool inyecta `Factura_id` automáticamente después de crear la cabecera.
 
-Si un producto de AI71 controla lote, crea primero `Factura_producto` y después `Factura_producto_lote` con el id del producto facturado. En el alta del subdetalle no envíes `Producto_lote_id`: Versat lo genera. Informa `Factura_producto_id`, `Producto_id`, `Lote_id` y `Cantidad`.
+Los contratos de factura exigen números JSON, ids enteros positivos, fechas ISO válidas y cadenas para textos. No envíes objetos o arreglos como valores escalares ni repitas campos con distinta capitalización. Ante `campos_factura_invalidos`, corrige los campos señalados. El servidor valida todo el árbol antes de crear la cabecera.
+
+Las retenciones admiten `Factura_cuota` y `Factura_clasificacion` dentro de `subdetalles`; en AG91 también `Factura_remision`. El servidor inyecta `Factura_id` con el id generado por la retención. Una clasificación anidada puede incluir centros de costo y devengamientos cuando el recurso los admita. No uses el id de la factura principal para esos hijos. Para centros de costo, lotes o devengamientos, incluye cada subdetalle en la propiedad `subdetalles` del detalle padre; la tool crea primero el padre e inyecta también su id.
+
+Si un producto de AI71 controla lote, crea primero `Factura_producto` y después `Factura_producto_lote` con el id del producto facturado. En el alta del subdetalle no envíes `Producto_lote_id`: Versat lo genera. Informa `Factura_producto_id`, `Producto_id`, `Lote_id` y `Cantidad`. El servidor rechaza `Producto_lote_id`, productos distintos del padre y cantidades cuya suma exceda la facturada. Comprueba también pertenencia al producto y depósito y el saldo informado; en altas individuales considera las asignaciones existentes. Ante `lote_factura_invalido`, corrige los datos señalados antes de volver a enviar.
 
 Resuelve `Lote_id` con `versat_buscar_lotes_producto_factura_insumos`. Informa producto, depósito, fecha y las opciones Si/No para admitir lotes vencidos y lotes sin saldo. Con `incluirLotesSinSaldo=No`, la tool excluye lotes con saldo físico y contable cero; con `Si`, solo los incluye si su configuración permite mostrarlos sin saldo.
 
@@ -182,7 +186,7 @@ Para crear la factura necesito confirmar estos datos de cabecera: tipo de factur
 2. Consulta la factura actual antes de actualizar si el usuario pide cambiar solo un campo.
 3. Usa la tool `versat_actualizar_factura_*` del mismo recurso, pasando `id` y `facturaJson`.
 4. No mezcles recursos: una factura AI71 se actualiza solo con `versat_actualizar_factura_insumos`.
-5. No fuerces `Status=Borrador` en actualización; esa regla aplica solo al alta.
+5. Omite `Status` de las actualizaciones de cabecera, detalle y subdetalle, incluso cuando sea nulo o Borrador. Su presencia provoca `status_factura_no_actualizable`; usa la tool de procesamiento para cambiar el estado.
 6. Si la tool rechaza la solicitud, muestra solo el mensaje de negocio y pregunta por el dato faltante o invalido.
 
 En actualización, `Doc_num` y `Codigo_control_elec` también son normalizados por el MCP para conservar solo dígitos.

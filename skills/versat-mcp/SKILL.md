@@ -31,6 +31,7 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 ## Decisiones que cambian el flujo
 
 - **Acceso bloqueado:** `debeDetenerse=true` o `accesoMcp=false` impiden continuar con tools de negocio. Usa `estadoValidacionMcp` y el código para distinguir acceso denegado, autenticación rechazada y validación indeterminada; no atribuyas falta de permiso a un timeout.
+- **Escritura incierta:** `resultado_escritura_incierto` o `resultadoIncierto=true` exigen consultar lo creado antes de otra escritura. El servidor no repite automáticamente el envío y devuelve `reintentar=false`; no crees un sustituto ni repitas el alta completa.
 - **Reintentos:** `reintentar=false` impide repetir la misma llamada sin cambios. El prefijo `servicio_versat_` por sí solo no significa fallo temporal. Con `reintentar=true`, espera el plazo indicado; en escrituras, verifica primero si hubo registros o cambios ya confirmados. Aplica [Resultados y recuperación](references/resultados.md).
 - **Corrección indicada:** usa `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente` sobre el borrador existente. Verifica la corrección antes de repetir `Aplicar`; no crees un sustituto.
 - **Búsquedas:** las tools ya intentan coincidencias flexibles. Usa `coincidencias`, `coincidenciaPrincipal` y totales; no multipliques variantes si hay resultados útiles. Pregunta únicamente cuando la ambigüedad afecte a la acción.
