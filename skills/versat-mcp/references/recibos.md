@@ -112,3 +112,5 @@ Usa solamente campos admitidos por el contrato de AF51 o del detalle seleccionad
 - Error por entidad ambigua: resuelve entidad con la referencia de entidades antes de insistir.
 - Éxito parcial: conserva los IDs conocidos, consulta cabecera y detalles y completa únicamente lo que falte en ese recibo. No repitas la tool completa ni apliques mientras falten cuotas o detalles de facturas no provisionadas.
 - Si el usuario pide anular o desaplicar sin motivo y la tool lo exige, pregunta el motivo.
+
+Las actualizaciones AF51, incluidos detalles y subdetalles, rechazan `Status` con cualquier capitalización o valor nulo. Envíe solo campos editables documentados en un objeto parcial no vacío y use `versat_procesar_recibos_transacciones` para cambiar estados.

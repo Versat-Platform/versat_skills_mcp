@@ -197,3 +197,5 @@ Detalles conocidos:
 - Si una busqueda devuelve cero resultados con nombre largo, repite con el apellido, razon social principal o palabra mas distintiva.
 - Si el usuario pide datos sensibles de una entidad ambigua, no muestres detalles de candidatos; pide elegir primero.
 - Si el usuario pide "todos", limita la respuesta inicial y ofrece continuar para evitar respuestas enormes.
+
+Las actualizaciones BA31 validan campos y tipos contra el contrato y admiten objetos parciales no vacíos. `Persona_juridica_sn` se normaliza también al actualizar; no envíe campos desconocidos.

@@ -46,3 +46,11 @@ Los campos de paginación nulos representan información no disponible; los regi
 El servidor expone `ultimaPagina`, `paginaAnterior` y `paginaSiguiente` cuando los metadatos lo permiten. En búsquedas de catálogos, revisa `paginasConsultadas`: conserva los filtros y tamaño de cada entrada y no sumes sus totales. Las búsquedas de cotizaciones y timbrados también exponen paginación; una página sin coincidencias no demuestra ausencia global ni justifica crear otro registro.
 
 En ejemplos contables, revisa `alcanceBusqueda`: identifica páginas consultadas y evaluadas, si se verificaron páginas finales y si se alcanzó el límite de recorrido. Si faltan totales, los ejemplos son solo una muestra inicial. Ordenar por fecha/id dentro de esa muestra no garantiza las fechas más recientes de páginas pendientes. Un error al consultar páginas finales se conserva como error y no como una búsqueda vacía exitosa.
+
+## Parámetros y límites del servidor
+
+`filtrosJson` y `consultaJson` solo admiten `filtro_campo`, `filtro_valor`, `pagina` y `registros_por_pagina`. BA31 mantiene `limit`/`offset` como compatibilidad traducida. Use los argumentos específicos para ids y detalles; nunca sustituya recurso, vista ni contexto. Página desde cero, tamaño entre 1 y 1000 y nombre flexible de hasta 512 caracteres.
+
+Ante `parametro_consulta_no_permitido`, `paginacion_invalida` o `campo_actualizacion_no_permitido`, corrija la entrada según el contrato. `respuesta_versat_demasiado_grande` requiere acotar filtros o reducir el tamaño de página. Una escritura con respuesta excesiva puede haberse completado: respete `resultado_escritura_incierto` y consulte antes de repetir.
+
+Un 403 `mcp_origen_host_no_permitido` requiere revisar la configuración del cliente y del servidor. Ante 429 respete Retry-After; no rote credenciales para eludir límites.
