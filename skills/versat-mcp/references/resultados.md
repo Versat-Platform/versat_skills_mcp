@@ -53,4 +53,4 @@ En ejemplos contables, revisa `alcanceBusqueda`: identifica páginas consultadas
 
 Ante `parametro_consulta_no_permitido`, `paginacion_invalida` o `campo_actualizacion_no_permitido`, corrija la entrada según el contrato. `respuesta_versat_demasiado_grande` requiere acotar filtros o reducir el tamaño de página. Una escritura con respuesta excesiva puede haberse completado: respete `resultado_escritura_incierto` y consulte antes de repetir.
 
-Un 403 `mcp_origen_host_no_permitido` requiere revisar la configuración del cliente y del servidor. Ante 429 respete Retry-After; no rote credenciales para eludir límites.
+El Host público no requiere una lista de destinos. Un 403 `mcp_origen_no_permitido` requiere revisar el Origin del cliente y los orígenes autorizados en el servidor. Ante 429 respete Retry-After; no rote credenciales para eludir límites.
