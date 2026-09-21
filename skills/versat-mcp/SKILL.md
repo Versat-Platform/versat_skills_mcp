@@ -38,6 +38,7 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 - **Recientes:** la página 0 contiene registros antiguos. Mantén filtros y tamaño de página al usar `totalPages`; si falta ese dato, no inventes la última página ni presentes una muestra como el conjunto completo.
 - **RUC:** consulta `versat_buscar_rucs` y usa el ID devuelto como `Ruc_id` en BA31. `Ruc_uk` no es un filtro de entidades.
 - **Mi empresa:** usa `versat_buscar_empresas`; OX01 es de solo lectura y corresponde exclusivamente a la empresa autorizada. No solicites otra empresa o modelo para sustituir ese contexto.
+- **Notificaciones de diagnóstico:** si el usuario administra el MCP y no puede ver logs, usa `versat_verificar_notificacion_diagnostico` para consultar el estado seguro. Solo usa `enviarPrueba=true` cuando solicite comprobar el envío. Informa si el webhook aceptó, rechazó o no respondió; no pidas ni muestres su URL, credencial, el JSON enviado a Versat ni la respuesta técnica incluida en la notificación interna.
 
 ## Comunicar el resultado
 
@@ -49,6 +50,8 @@ Usa los mensajes de negocio controlados. Omite credenciales, headers sensibles, 
 
 La fuente oficial es [Versat MCP Skills](https://github.com/Versat-Platform/versat_skills_mcp), rama `main`, manifiesto `skills-manifest.json`, ruta `skills/versat-mcp`.
 
-Cuando el usuario pida instalar o actualizar la versión distribuida, usa `versat_sincronizar_skills` e informa la versión local cuando esté disponible. Si devuelve archivos, persiste el paquete completo bajo `rutaDestinoRelativa` en el directorio de skills compatible con el cliente, respetando cada `rutaRelativa`. Comprueba la versión y los hashes suministrados. La descarga o preparación del paquete no equivale a una instalación; confirma `versionOficial` solo después de verificar los archivos escritos.
+Cuando el usuario pida instalar o actualizar la versión distribuida, informa la versión local cuando esté disponible y usa `versat_sincronizar_skills`. Si devuelve archivos, persiste el paquete completo bajo `rutaDestinoRelativa` en el directorio de skills compatible con el cliente, respetando cada `rutaRelativa`. Comprueba la versión y los hashes suministrados. La descarga o preparación del paquete no equivale a una instalación; confirma `versionOficial` solo después de verificar los archivos escritos.
+
+Si `versat_sincronizar_skills` no está expuesta por el servidor conectado, no concluyas que la actualización es imposible ni reemplaces la solicitud por una recomendación de actualizar el servidor. Consulta directamente el `skills-manifest.json` de la fuente oficial y compáralo con el archivo `VERSION` de la skill instalada; si la versión local no puede leerse, compara los hashes de los archivos disponibles. Cuando difieran, actualiza desde la rama `main` copiando el paquete completo de `skills/versat-mcp` si el cliente permite escribir, o entrega al usuario instrucciones concretas para sustituir esa carpeta y recargar las skills. Aclara que este procedimiento actualiza la skill del cliente, no el servidor MCP. Diagnostica por separado una posible incompatibilidad del servidor solo cuando su catálogo de tools no coincida con el contrato esperado.
 
 Si el cliente no permite escribir skills, informa esa limitación y continúa las tareas de negocio con la guía MCP. Mejorar el contenido fuente de la skill es una tarea de mantenimiento del repositorio oficial; no la confundas con instalar la versión publicada.

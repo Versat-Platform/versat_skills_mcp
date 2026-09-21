@@ -49,7 +49,7 @@ Presenta el resultado como una operacion habilitada para facturas financieras, d
 
 Para `versat_buscar_timbrados`, el tipo de documento es obligatorio. Primero resuelve el tipo de documento y llama la tool informando `documentoTipoId`.
 
-Un timbrado solo esta disponible para una factura si existe un expedidor del timbrado con el mismo tipo de documento. Si falta `documentoTipoId`, no busques timbrados ni sugieras ids.
+El MCP bloquea un timbrado solo si la consulta de expedidores publica una incompatibilidad para ese timbrado y tipo de documento. Si la consulta auxiliar no devuelve el timbrado, Versat valida el dato al crear la factura. Si falta `documentoTipoId`, no busques timbrados ni sugieras ids.
 
 En las búsquedas específicas de timbrado por factura, informa únicamente el contexto de la emisión: para `El Parcero`, entidad y emisión; para `La Empresa`, tipo de documento, unidad y emisión.
 

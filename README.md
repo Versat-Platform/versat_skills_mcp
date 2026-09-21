@@ -331,6 +331,8 @@ Pida al agente instalar o actualizar la skill oficial de Versat. El flujo usa `v
 
 La tool prepara el paquete oficial, pero no escribe archivos en el cliente. Solo confirme la instalación después de guardar y verificar los archivos.
 
+Si el servidor conectado no expone `versat_sincronizar_skills`, compare directamente el archivo `VERSION` instalado con la versión publicada en `skills-manifest.json`. Si no puede leer la versión local, compare los hashes disponibles. Una diferencia se resuelve mediante el procedimiento del repositorio oficial descrito a continuación; la ausencia de la tool no convierte automáticamente la actualización de la skill en una actualización del servidor MCP.
+
 ### Desde el repositorio oficial
 
 Clone la rama de distribución:
