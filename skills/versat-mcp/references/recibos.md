@@ -27,6 +27,8 @@ Sigue [Buscar los registros más recientes](resultados.md#buscar-los-registros-m
 
 La cabecera y cada cuerpo de detalle deben ser objetos JSON completos. El servidor valida sus campos obligatorios antes de escribir. Si devuelve `json_alta_invalido` o `campos_obligatorios_alta_faltantes`, corrige solo el cuerpo señalado y no reintentes sin cambios.
 
+En los detalles, `Financ_baja` requiere `Ret_tot_parc` y `Financ_factura` requiere `Cambio_man_sn`. Obtén siempre el contrato actualizado llamando la tool sin JSON antes de completar datos faltantes.
+
 Checklist minimo antes de crear:
 
 - Entidad unica confirmada.

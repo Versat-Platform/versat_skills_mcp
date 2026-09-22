@@ -120,6 +120,8 @@ El MCP incluye centros vinculados a esa actividad y centros generales sin activi
 
 La cabecera y cada cuerpo de detalle deben ser objetos JSON completos. El servidor rechaza JSON inválido y campos obligatorios ausentes antes de crear la cabecera; corrige los campos listados y vuelve a intentar una sola vez con el cuerpo completo.
 
+Campos obligatorios que suelen requerir atención: `Cambio_man_sn` en las cabeceras AF31, AI71 y AG91 y en `Factura_retencion`; `Tipo_gasto` en `Factura_clasificacion`; y `Flete_tipo` en `Factura_flete`. Para `Flete_tipo`, usa uno de los valores publicados: `CIF`, `CPT`, `CIP`, `FOB` o `CFR`.
+
 Checklist minimo antes de crear:
 
 - Tipo de factura definido: financiera, insumos o granos.
