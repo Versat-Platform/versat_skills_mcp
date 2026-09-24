@@ -151,6 +151,7 @@ Si la conexión funciona, continúe con [Instalar o actualizar la skill](#instal
 | --- | --- |
 | `401`, `Auth required` o `mcp_http_bearer_ausente_o_invalido` | Pulse **Connect / Authenticate** en el cliente. Si usa conexión manual, revise que el token esté configurado en el cliente. |
 | OAuth expirado o servidor reiniciado | Conecte de nuevo y complete la página de Versat. |
+| Chrome muestra `127.0.0.1 está bloqueado` después de iniciar sesión en Codex | Vuelva a Codex y compruebe si la conexión figura como autenticada. El retorno local puede haberse entregado antes de que Chrome muestre el bloqueo. Si Codex aún solicita autenticación, inicie una conexión nueva y permita el retorno local en su navegador. |
 | El formulario rechaza el acceso | Compruebe que escribió su usuario de Versat y el token de esa misma cuenta. |
 | `acceso_mcp_denegado` o estado `denegado` | El administrador debe revisar la habilitación MCP para esa credencial o empresa |
 | Estado `indeterminado` | No pudo completarse la validación; no demuestra falta de permiso |
