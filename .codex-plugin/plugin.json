@@ -1,0 +1,20 @@
+{
+  "name": "versat-mcp",
+  "version": "1.2.57",
+  "description": "Conecta el MCP de Versat e incluye la skill oficial para consultar y operar datos de negocio.",
+  "author": {
+    "name": "Versat Platform"
+  },
+  "repository": "https://github.com/Versat-Platform/versat_skills_mcp",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Versat MCP",
+    "shortDescription": "Conectar Versat y usar su skill oficial",
+    "longDescription": "Incluye la conexión al MCP de Versat y la skill oficial para entidades, facturas, recibos y catálogos.",
+    "developerName": "Versat Platform",
+    "category": "Productivity",
+    "capabilities": ["MCP", "Skills"],
+    "defaultPrompt": "Usa Versat para consultar mi empresa autorizada."
+  }
+}

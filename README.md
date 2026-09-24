@@ -1,272 +1,122 @@
-# Versat MCP Skills
+# Versat MCP: plugin y skills
 
-Instrucciones opcionales para que agentes de IA usen las tools de Versat con criterios de negocio consistentes. El servidor MCP conserva sus validaciones y puede utilizarse sin instalar skills.
+El plugin reúne la conexión al MCP de Versat y una skill opcional con instrucciones de negocio. El servidor MCP conserva sus validaciones y también puede utilizarse sin instalar el plugin o la skill.
 
 Este repositorio, en la rama `main`, es la fuente oficial de distribución. [skills-manifest.json](skills-manifest.json) identifica versiones, rutas y hashes SHA-256; cada skill incluye `VERSION`. Una edición local no actualiza la versión publicada hasta incorporarse a la rama de distribución.
 
+## Instalar el plugin de Versat
+
+El plugin instala **la conexión al MCP y la skill oficial** en los clientes compatibles. Use el repositorio `Versat-Platform/versat_skills_mcp` como fuente. Antes de conectarse, entre al sistema Versat y genere su **Token Bearer**. Cuando aparezca la página de acceso, escriba su **usuario habitual de Versat** en Usuario y el **Token Bearer generado en Versat** en Contraseña. El plugin no guarda credenciales.
+
+| Cliente | Instalación |
+| --- | --- |
+| Claude (web, Desktop o Cowork) | Abra **Customize → Plugins → + → Add marketplace → Add from a repository**. Indique `Versat-Platform/versat_skills_mcp`, abra el marketplace **Versat Platform** e instale **versat-mcp**. |
+| Claude Code | Ejecute `/plugin marketplace add Versat-Platform/versat_skills_mcp` y después `/plugin install versat-mcp@versat-platform`. |
+| Codex | Ejecute `codex plugin marketplace add Versat-Platform/versat_skills_mcp` y `codex plugin add versat-mcp@versat-platform`. También puede instalarlo desde el directorio de plugins tras agregar el marketplace. |
+| VS Code con GitHub Copilot | Ejecute **Chat: Install Plugin From Source** e indique `https://github.com/Versat-Platform/versat_skills_mcp.git`. |
+| Cursor | En un chat del agente, escriba `/add-plugin versat-mcp@https://github.com/Versat-Platform/versat_skills_mcp.git` y siga la instalación. |
+
+Después de instalar, conecte **versat** cuando el cliente solicite autenticación y pruebe una consulta de lectura en [Probar la conexión](#probar-la-conexion). Si su cliente no admite plugins, siga [Conectar al MCP de Versat](#conectar-al-mcp-de-versat) y, si desea, [instale la skill](#instalar-o-actualizar-la-skill) por separado. Si ya configuró el MCP y la skill manualmente, evite registrar una segunda conexión `versat` al instalar el plugin.
+
+La instalación por plugin requiere que el servidor MCP tenga OAuth habilitado y que el cliente admita autenticación OAuth para servidores remotos. Si su instalación usa otra URL del MCP, utilice la [conexión manual](#conectar-al-mcp-de-versat) con la dirección entregada por su administrador. Consulte las guías de [Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude), [Claude Code](https://code.claude.com/docs/en/plugin-marketplaces), [Codex](https://developers.openai.com/plugins/build/plugins) y [VS Code](https://code.visualstudio.com/docs/agent-customization/agent-plugins) si cambió la interfaz de instalación.
+
 ## Conectar al MCP de Versat
 
-Para usar Versat necesita **conectar el servidor MCP en su agente**. Después puede instalar esta skill para obtener orientación adicional. No necesita clonar este repositorio ni ejecutar el servidor en su computadora para conectarse a una instalación publicada.
+Antes de conectar, entre al **sistema Versat con su usuario habitual** y genere allí un **Token Bearer**. Necesita ese token tanto para OAuth como para la conexión Bearer directa. Solicite al administrador la URL del MCP y la habilitación de acceso MCP si aún no los tiene. En los ejemplos se usa `https://mcp-versat.azurewebsites.net/mcp`; si le entregaron otra URL, use esa. No necesita instalar esta skill para conectar.
 
-### Datos que debe tener
+**La forma más fácil es OAuth, cuando está habilitado en la instalación:** agregue la URL en su cliente y pulse **Conectar**. En la página de Versat complete:
 
-Solicite al administrador de Versat la URL y un token con acceso MCP habilitado.
-
-| Campo | Valor para los ejemplos |
+| Campo | Qué escribir |
 | --- | --- |
-| Nombre de la conexión | `versat` |
-| Transporte | `Streamable HTTP` o `HTTP`, según el cliente |
-| URL del servidor | `https://mcp-versat.azurewebsites.net/mcp` |
-| Credencial | Su token de Versat, sin espacios adicionales ni el prefijo `Bearer` |
-| Variable de entorno usada en esta guía | `VERSAT_MCP_TOKEN` |
+| Usuario | El mismo usuario con el que inicia sesión en el sistema Versat |
+| Contraseña / Token Bearer | El Token Bearer que generó en el sistema Versat; no es la contraseña con la que entra al sistema |
 
-Si el administrador le entrega otra URL, sustitúyala en los ejemplos. Conserve la ruta completa, incluido `/mcp`. El token de Versat no es la contraseña de su agente ni una clave de OpenAI o Anthropic.
+Si el token empieza por `Bearer `, también puede pegarlo completo. No introduzca el token en los campos *OAuth Client ID* o *Client Secret*. El cliente recibe una credencial del MCP; las operaciones en Versat siguen usando únicamente su token Bearer de Versat.
 
-El servidor admite `Authorization: Bearer <TOKEN_VERSAT>` o `X-Versat-Mcp-Token: <TOKEN_VERSAT>`. Use una sola forma por conexión. Los ejemplos usan marcadores o variables: sustituya `<TOKEN_VERSAT>` únicamente en su configuración privada, nunca en este repositorio o en el chat.
+### Claude: web, Desktop y Cowork
 
-### Elija su cliente
+1. Abra **Customize → Connectors → + → Add custom connector**.
+2. Ponga el nombre `versat` y la URL del MCP. Deje vacíos los ajustes OAuth avanzados.
+3. Pulse **Add** y después **Connect**. Complete la página de Versat con su usuario y token.
+4. Active el conector en la conversación desde **+ → Connectors**.
 
-| Cliente | Instrucciones |
-| --- | --- |
-| Codex: aplicación, CLI o extensión | [Conectar Codex](#codex) |
-| Claude Code | [Conectar Claude Code](#claude-code) |
-| Claude Desktop | [Conectar Claude Desktop mediante un puente local](#claude-desktop) |
-| Claude web / Cowork | [Comprobar compatibilidad del conector remoto](#claude-web-y-cowork) |
-| Cursor | [Conectar Cursor](#cursor) |
-| VS Code con GitHub Copilot | [Conectar VS Code](#vs-code-con-github-copilot) |
-| Windsurf / Cascade | [Conectar Windsurf](#windsurf-y-cascade) |
-| Otro agente | [Datos para otros clientes](#otros-agentes) |
+En planes Team o Enterprise, el propietario de la organización debe agregar primero el conector en **Organization settings → Connectors**; cada persona pulsa después **Connect** con su propia credencial. [Instrucciones oficiales de Claude](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
 
-### Preparar la variable de entorno
+### Claude Code
 
-Codex, Claude Code y los ejemplos de Cursor/Windsurf leen `VERSAT_MCP_TOKEN`. Su valor debe ser **solo el token**; los ejemplos agregan el encabezado cuando corresponde. Si un formulario pide el *nombre* de la variable, escriba `VERSAT_MCP_TOKEN`, no el secreto.
-
-Para una sesión de terminal, puede introducir el token sin mostrarlo ni escribirlo como parte del comando:
-
-**Bash, en Linux o macOS** — si usa zsh, abra `bash` antes de este bloque:
+En una terminal, registre el servidor una vez:
 
 ```bash
-read -r -s -p "Token Versat: " VERSAT_MCP_TOKEN
-export VERSAT_MCP_TOKEN
-printf '\n'
+claude mcp add --transport http versat --scope user https://mcp-versat.azurewebsites.net/mcp
 ```
 
-**PowerShell, en Windows:**
+Abra Claude Code, ejecute `/mcp`, seleccione `versat` y autentíquese en la página de Versat. [Instrucciones oficiales de Claude Code](https://code.claude.com/docs/en/mcp).
 
-```powershell
-$versatCredencial = Read-Host "Token Versat" -AsSecureString
-$env:VERSAT_MCP_TOKEN = [System.Net.NetworkCredential]::new("", $versatCredencial).Password
-Remove-Variable versatCredencial
-```
+### Codex
 
-Inicie el agente desde esa misma terminal. Estas variables duran esa sesión; para uso permanente, utilice el entorno privado del usuario o el mecanismo de secretos de su cliente. Una aplicación ya abierta no recibe automáticamente cambios hechos en otra terminal. VS Code ofrece abajo una alternativa que pide el token al conectar; Claude Desktop tiene su propia configuración local.
+En la aplicación o extensión, abra **Settings → MCP servers → Add server**, escriba `versat`, elija **Streamable HTTP** e indique la URL. Guarde y seleccione **Authenticate** cuando aparezca.
 
-## Codex
-
-La aplicación de escritorio, la CLI y la extensión de Codex comparten la configuración del mismo host. Puede usar la interfaz o editar `~/.codex/config.toml`. [Documentación oficial de MCP en Codex](https://learn.chatgpt.com/docs/extend/mcp).
-
-### Aplicación o extensión
-
-1. Abra **Settings → MCP servers → Add server**; en la extensión, entre desde el menú de configuración.
-2. Use el nombre `versat`, transporte **Streamable HTTP** y la URL de la tabla anterior.
-3. Configure la autenticación por variable Bearer con el nombre `VERSAT_MCP_TOKEN`. Si su interfaz no muestra ese campo, guarde la entrada y edítela como se indica abajo.
-4. Guarde y reinicie la conexión MCP o la extensión.
-
-### Archivo de configuración
-
-Agregue esta entrada a `~/.codex/config.toml`, conservando las demás configuraciones:
-
-```toml
-[mcp_servers.versat]
-url = "https://mcp-versat.azurewebsites.net/mcp"
-bearer_token_env_var = "VERSAT_MCP_TOKEN"
-```
-
-Si prefiere el encabezado personalizado, **sustituya** `bearer_token_env_var` por:
-
-```toml
-env_http_headers = { "X-Versat-Mcp-Token" = "VERSAT_MCP_TOKEN" }
-```
-
-Para escritorio o extensión que no hereden su entorno de terminal, configure el valor en el archivo privado `~/.codex/.env` y reinicie el cliente. [Entorno de escritorio y extensión](https://learn.chatgpt.com/docs/amazon-bedrock#desktop-app-and-ide-extension).
-
-```dotenv
-VERSAT_MCP_TOKEN=<TOKEN_VERSAT>
-```
-
-### CLI
-
-Con la variable preparada, este comando registra la misma conexión:
+En la CLI puede hacer lo mismo con:
 
 ```bash
-codex mcp add versat --url https://mcp-versat.azurewebsites.net/mcp --bearer-token-env-var VERSAT_MCP_TOKEN
-codex mcp list
+codex mcp add versat --url https://mcp-versat.azurewebsites.net/mcp
+codex mcp login versat
 ```
 
-En una sesión de Codex, `/mcp` muestra los servidores activos. Continúe con [Probar la conexión](#probar-la-conexion). El token estático de esta instalación no requiere `codex mcp login`, que inicia OAuth.
+Complete la página de Versat con su usuario y token. [Instrucciones oficiales de Codex](https://learn.chatgpt.com/docs/extend/mcp).
 
-## Claude Code
+### Cursor
 
-Configure el servidor en el proyecto mediante `.mcp.json`. Claude Code admite `${VERSAT_MCP_TOKEN}` en los encabezados y permite revisar la conexión con `/mcp`. [Documentación oficial de Claude Code](https://code.claude.com/docs/en/mcp).
-
-1. Prepare `VERSAT_MCP_TOKEN` en la terminal desde la que iniciará Claude Code.
-2. En la raíz del proyecto, cree o complete `.mcp.json`:
+Abra `~/.cursor/mcp.json` para usarlo en todos sus proyectos, o `.cursor/mcp.json` dentro de un proyecto. Agregue:
 
 ```json
 {
   "mcpServers": {
     "versat": {
-      "type": "http",
-      "url": "https://mcp-versat.azurewebsites.net/mcp",
-      "headers": {
-        "X-Versat-Mcp-Token": "${VERSAT_MCP_TOKEN}"
-      }
+      "url": "https://mcp-versat.azurewebsites.net/mcp"
     }
   }
 }
 ```
 
-3. Ejecute `claude` desde ese proyecto y acepte el servidor cuando el cliente solicite aprobar su configuración.
-4. Use `/mcp` o `claude mcp list` y después [pruebe una consulta](#probar-la-conexion).
+Habilite `versat` en la configuración MCP de Cursor y siga la autenticación que muestre el cliente. Si su versión no ofrece inicio OAuth, use [conexión manual con token](#conexion-manual-con-token). [Instrucciones oficiales de Cursor](https://prod.cursor.com/help/customization/mcp).
 
-Para todos sus proyectos, puede registrar una entrada de usuario mediante esta alternativa en Bash. Las comillas simples conservan la referencia a la variable:
+### VS Code con GitHub Copilot
 
-```bash
-claude mcp add-json --scope user versat '{"type":"http","url":"https://mcp-versat.azurewebsites.net/mcp","headers":{"X-Versat-Mcp-Token":"${VERSAT_MCP_TOKEN}"}}'
-```
+Abra la paleta de comandos y ejecute **MCP: Add Server**. Elija **HTTP**, escriba la URL del MCP, asígnele el nombre `versat` y elija configuración **Global** para usarla en todos sus proyectos. Inicie el servidor desde **MCP: List Servers** y complete la autenticación cuando VS Code abra el navegador.
 
-Elija la configuración de proyecto o de usuario; evite dos entradas del mismo nombre con valores diferentes. Una variable sin definir no se reemplaza por un token válido.
+También puede abrir **MCP: Open User Configuration** o editar `.vscode/mcp.json` en un proyecto y agregar el servidor bajo `servers`, sin encabezados. [Instrucciones oficiales de VS Code](https://code.visualstudio.com/docs/agent-customization/mcp-servers).
 
-## Claude Desktop
+### Windsurf y Cascade
 
-Para la instalación de Versat con token por encabezado, una opción es ejecutar un **puente local `mcp-remote`**, que conecta Claude Desktop con el servidor HTTPS. Es un paquete de terceros que se ejecuta en su computadora; no es una skill de Versat. [Documentación del paquete](https://github.com/punkpeye/mcp-remote).
-
-1. Instale Node.js LTS con npm y compruebe `node --version` y `npx --version`.
-2. En Claude Desktop, abra **Settings → Developer → Edit Config**. Las ubicaciones habituales son `~/Library/Application Support/Claude/claude_desktop_config.json` en macOS y `%APPDATA%\Claude\claude_desktop_config.json` en Windows. [Configuración local documentada por MCP](https://modelcontextprotocol.io/docs/develop/connect-local-servers).
-3. Agregue `versat` dentro de `mcpServers`, conservando las demás entradas:
+En Cascade, abra **⋯ → MCPs → Open MCP config file** y agregue esta entrada a `mcpServers`:
 
 ```json
 {
   "mcpServers": {
     "versat": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp-versat.azurewebsites.net/mcp",
-        "--header",
-        "X-Versat-Mcp-Token:${VERSAT_MCP_TOKEN}"
-      ],
-      "env": {
-        "VERSAT_MCP_TOKEN": "<TOKEN_VERSAT>"
-      }
+      "serverUrl": "https://mcp-versat.azurewebsites.net/mcp"
     }
   }
 }
 ```
 
-4. Sustituya el marcador por su token solo en ese archivo privado. La referencia `${VERSAT_MCP_TOKEN}` de `args` la resuelve el puente. `npx -y` descarga el paquete cuando hace falta.
-5. Cierre completamente Claude Desktop, ábralo de nuevo y [pruebe la conexión](#probar-la-conexion).
+Guarde y conecte mediante OAuth si aparece esa opción. Si su versión solo admite encabezados, use [conexión manual con token](#conexion-manual-con-token). [Instrucciones oficiales de Cascade](https://docs.devin.ai/desktop/cascade/mcp).
 
-Si no encuentra `npx`, revise la instalación y la ruta ejecutable disponible para Claude. No copie la entrada HTTP de Claude Code como si fuera una configuración de proceso local de Desktop.
+### Conexión manual con token
 
-## Claude web y Cowork
+Use este método solo cuando su cliente no pueda completar OAuth. Primero genere el Token Bearer en el sistema Versat. Configure un servidor **HTTP / Streamable HTTP** con la URL del MCP y **una** de estas credenciales:
 
-El flujo documentado de conectores remotos se configura en **Customize → Connectors → + → Add custom connector**, con la URL y, cuando corresponde, parámetros OAuth. Esas conexiones se originan desde la infraestructura de Anthropic. [Guía oficial de conectores remotos](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
-
-Esta instalación de Versat recibe un token por encabezado; el flujo descrito arriba no publica un inicio de sesión OAuth. Por eso **introducir únicamente la URL no completa la autenticación**. El token de Versat tampoco debe colocarse en un campo `OAuth Client Secret`.
-
-Si su interfaz no permite enviar el Bearer o encabezado personalizado requerido, use Claude Code o la opción de Claude Desktop de esta guía. Para habilitar un conector web, el administrador debe proporcionar una integración con autenticación compatible. El puente local de Desktop no habilita por sí sola Claude web o Cowork.
-
-## Cursor
-
-Cursor admite MCP remoto con encabezados y variables `${env:NOMBRE}`. Cree `.cursor/mcp.json` en el proyecto o `~/.cursor/mcp.json` para uso personal global. [Documentación oficial de Cursor](https://cursor.com/docs/mcp).
-
-1. Prepare `VERSAT_MCP_TOKEN` en el entorno que inicia Cursor.
-2. Agregue esta entrada al archivo elegido:
-
-```json
-{
-  "mcpServers": {
-    "versat": {
-      "url": "https://mcp-versat.azurewebsites.net/mcp",
-      "headers": {
-        "X-Versat-Mcp-Token": "${env:VERSAT_MCP_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-3. Reinicie Cursor si cambió su entorno y habilite `versat` en la sección MCP del cliente.
-4. Abra el chat del agente y [pruebe la conexión](#probar-la-conexion).
-
-Para este servidor remoto, un `envFile` no sustituye la variable del entorno: esa opción de Cursor corresponde a procesos stdio. No use la sintaxis `${VERSAT_MCP_TOKEN}` de Claude Code en este bloque.
-
-## VS Code con GitHub Copilot
-
-Use `.vscode/mcp.json`. El ejemplo solicita el token mediante una entrada oculta y evita escribirlo dentro del JSON. VS Code utiliza la clave `servers`. [Formato oficial de configuración](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
-
-```json
-{
-  "inputs": [
-    {
-      "id": "versat-token",
-      "type": "promptString",
-      "description": "Token Versat, sin el prefijo Bearer",
-      "password": true
-    }
-  ],
-  "servers": {
-    "versat": {
-      "type": "http",
-      "url": "https://mcp-versat.azurewebsites.net/mcp",
-      "headers": {
-        "X-Versat-Mcp-Token": "${input:versat-token}"
-      }
-    }
-  }
-}
-```
-
-1. Guarde el archivo, abra **MCP: List Servers** en la paleta de comandos y seleccione `versat` para iniciarlo.
-2. Introduzca el token cuando VS Code lo solicite y acepte la confianza del servidor cuando corresponda.
-3. Habilite sus herramientas en el chat de Copilot y [pruebe la conexión](#probar-la-conexion).
-
-Este ejemplo está orientado al agente integrado de Copilot. Una extensión de otro proveedor puede usar su propia configuración. [Administrar servidores MCP en VS Code](https://code.visualstudio.com/docs/agent-customization/mcp-servers).
-
-## Windsurf y Cascade
-
-Abra la configuración MCP de Cascade y edite `~/.codeium/windsurf/mcp_config.json`. El formato admite `serverUrl` y variables `${env:NOMBRE}`. La documentación actual de Cascade también se publica bajo Devin Desktop. [Documentación oficial de Cascade](https://docs.devin.ai/desktop/cascade/mcp).
-
-```json
-{
-  "mcpServers": {
-    "versat": {
-      "serverUrl": "https://mcp-versat.azurewebsites.net/mcp",
-      "headers": {
-        "X-Versat-Mcp-Token": "${env:VERSAT_MCP_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-Prepare la variable en el entorno del cliente, guarde y recargue los servidores MCP. Habilite las tools de Versat que necesite y [pruebe una consulta](#probar-la-conexion).
-
-## Otros agentes
-
-En el formulario de servidores MCP del cliente, informe:
-
-| Campo del cliente | Qué escribir |
+| Campo que ofrece el cliente | Valor |
 | --- | --- |
-| Nombre | `versat` |
-| Transporte | HTTP / Streamable HTTP |
-| URL | La URL completa de su instalación, terminada en `/mcp` |
-| Bearer token | Solo el token, cuando el formulario agrega `Bearer` automáticamente |
-| Encabezado personalizado, como alternativa | Nombre `X-Versat-Mcp-Token`; valor igual al token |
+| Bearer token | Su token de Versat, sin la palabra `Bearer` |
+| Encabezado personalizado | Nombre `X-Versat-Mcp-Token`; valor: su token de Versat sin `Bearer` |
 
-Si solo admite procesos stdio locales, compruebe si acepta un puente como el de Claude Desktop. Si solo ofrece OAuth y no permite encabezados, necesita una integración compatible proporcionada por su administrador. Use el esquema de configuración documentado por ese cliente.
+Guarde el token en el almacén privado de credenciales del cliente. No lo pegue en chats, archivos compartidos ni en este repositorio. En VS Code, puede usar una entrada `promptString` con `password: true`; en otros clientes, siga su mecanismo privado de secretos. [Referencia de configuración de VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
+
+### Otros clientes
+
+Seleccione transporte **HTTP / Streamable HTTP**, nombre `versat` y la URL completa terminada en `/mcp`. Si aparece una pantalla de inicio de sesión, use su usuario y token de Versat. Si no existe OAuth, siga la [conexión manual](#conexion-manual-con-token).
 
 ## Probar la conexion
 
@@ -291,14 +141,13 @@ Si la conexión funciona, continúe con [Instalar o actualizar la skill](#instal
 
 | Problema | Qué revisar |
 | --- | --- |
-| `401`, `Auth required` o `mcp_http_bearer_ausente_o_invalido` | Que el cliente envíe el token, que la variable exista en su proceso y que no se haya escrito el nombre de la variable como valor del token |
-| Variable no encontrada o token vacío | Nombre exacto `VERSAT_MCP_TOKEN`, sintaxis propia del cliente y reinicio después de configurar el entorno |
-| Solicitud inesperada de OAuth | Verifique la configuración del Bearer o encabezado. El token de Versat no es un OAuth Client ID/Secret |
+| `401`, `Auth required` o `mcp_http_bearer_ausente_o_invalido` | Pulse **Connect / Authenticate** en el cliente. Si usa conexión manual, revise que el token esté configurado en el cliente. |
+| OAuth expirado o servidor reiniciado | Conecte de nuevo y complete la página de Versat. |
+| El formulario rechaza el acceso | Compruebe que escribió su usuario de Versat y el token de esa misma cuenta. |
 | `acceso_mcp_denegado` o estado `denegado` | El administrador debe revisar la habilitación MCP para esa credencial o empresa |
 | Estado `indeterminado` | No pudo completarse la validación; no demuestra falta de permiso |
 | `426` | Use HTTPS y solicite revisar el proxy de la instalación |
 | Servidor configurado, pero sin tools | Revise que esté habilitado y aprobado en el cliente, la URL completa y posibles restricciones de su organización |
-| `npx` no encontrado en Desktop | Revise Node.js/npm y la ruta del ejecutable que puede usar Claude |
 | Timeout o `reintentar=true` | Espere el plazo indicado y revise conectividad; no repita escrituras con resultado incierto |
 
 No envíe capturas con tokens ni copie cuerpos técnicos al reportar un problema. Para el comportamiento de negocio ante bloqueos o fallos, consulte [Autenticación](skills/versat-mcp/references/authentication.md) y [Resultados y recuperación](skills/versat-mcp/references/resultados.md).
@@ -319,6 +168,8 @@ La entrada [versat-mcp](skills/versat-mcp/SKILL.md) selecciona el flujo y carga 
 El contrato vigente de las tools y las validaciones del servidor prevalecen sobre la skill. Use `versat_obtener_guia_uso`, el resource `versat://guia/uso` o el prompt `versat_usar_mcp` para obtener la guía del servidor conectado.
 
 ## Instalar o actualizar la skill
+
+Si instaló el plugin, la skill ya está incluida. Siga estos pasos solo para instalarla de forma independiente.
 
 ### Mediante el MCP
 
@@ -364,7 +215,7 @@ Si el cliente no admite skills, continúe con la guía MCP. No es necesario copi
 
 1. Actualice la skill y solo las referencias afectadas, siguiendo las reglas y contratos vigentes del servidor.
 2. Si cambia una orientación transversal, alinee también la guía MCP que comparten tool, resource y prompt.
-3. Incremente `skills/versat-mcp/VERSION` y la versión de `skills-manifest.json`. Registre todo archivo distribuido y recalcule sus hashes SHA-256.
+3. Incremente `skills/versat-mcp/VERSION`, la versión de `skills-manifest.json` y la de los manifiestos del plugin. Registre todo archivo de la skill distribuido y recalcule sus hashes SHA-256.
 4. Ejecute `ruby scripts/validar_distribucion.rb` y `git diff --check`.
 5. Sincronice desde este repositorio el espejo `skills/versat-mcp` del servidor y compare los archivos.
 

@@ -58,4 +58,39 @@ manifiesto["skills"].each do |skill|
   end
 end
 
-puts "Distribución de skills válida."
+nombre_plugin = "versat-mcp"
+version_plugin = manifiesto.fetch("skills").find { |skill| skill["name"] == nombre_plugin }&.fetch("version")
+abort "La skill del plugin no está en el manifiesto" unless version_plugin
+
+plugin = JSON.parse((raiz / "plugin.json").read)
+plugin_codex = JSON.parse((raiz / ".codex-plugin/plugin.json").read)
+plugin_claude = JSON.parse((raiz / ".claude-plugin/plugin.json").read)
+mercado_codex = JSON.parse((raiz / ".agents/plugins/marketplace.json").read)
+mercado_claude = JSON.parse((raiz / ".claude-plugin/marketplace.json").read)
+mcp_portatil = JSON.parse((raiz / "mcp.json").read)
+mcp_nativo = JSON.parse((raiz / ".mcp.json").read)
+
+[plugin, plugin_codex, plugin_claude].each do |datos|
+  abort "Nombre divergente en el plugin" unless datos["name"] == nombre_plugin
+  abort "Versión divergente en el plugin" unless datos["version"] == version_plugin
+end
+
+abort "Ruta de skills inválida para Codex" unless plugin_codex["skills"] == "./skills/"
+abort "Ruta MCP inválida para Codex" unless plugin_codex["mcpServers"] == "./.mcp.json"
+abort "Skill no encontrada en el plugin" unless (raiz / "skills" / nombre_plugin / "SKILL.md").file?
+abort "Versión del marketplace Claude divergente" unless mercado_claude.fetch("plugins").any? { |entrada| entrada["name"] == nombre_plugin && entrada["source"] == "." && entrada["version"] == version_plugin }
+abort "Marketplace Codex inválido" unless mercado_codex.fetch("plugins").any? do |entrada|
+  entrada["name"] == nombre_plugin && entrada.dig("source", "source") == "local" && entrada.dig("source", "path") == "./" && entrada.dig("policy", "authentication") == "ON_INSTALL"
+end
+
+url_portatil = mcp_portatil.dig("mcpServers", "versat", "url")
+url_nativa = mcp_nativo.dig("mcpServers", "versat", "url")
+abort "URL MCP divergente" unless url_portatil == url_nativa && url_portatil.to_s.match?(%r{\Ahttps://[^/]+/mcp\z})
+abort "Transporte MCP portátil inválido" unless mcp_portatil.dig("mcpServers", "versat", "type") == "streamable-http"
+abort "Transporte MCP nativo inválido" unless mcp_nativo.dig("mcpServers", "versat", "type") == "http"
+
+[mcp_portatil, mcp_nativo].each do |configuracion|
+  abort "No incluya credenciales en el plugin" unless configuracion.fetch("mcpServers").fetch("versat").keys.sort == %w[type url]
+end
+
+puts "Distribución de skills y plugin válida."
