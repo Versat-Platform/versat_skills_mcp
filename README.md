@@ -20,6 +20,8 @@ En la ventana **Agregar marketplace de plugins** de Codex, escriba `Versat-Platf
 
 El catálogo de Claude distribuye el plugin desde `plugins/claude/versat-mcp`. Esa carpeta ya contiene la conexión MCP y la skill, por lo que no necesita copiar archivos por separado.
 
+Si Claude muestra un aviso sobre el acceso del **Claude GitHub App**, el marketplace ya puede aparecer en el catálogo e instalarse. Ese acceso es necesario para mantener activa la sincronización automática de futuras actualizaciones del repositorio.
+
 Si macOS muestra el error de licencia de Xcode al clonar, abra Terminal y ejecute `sudo xcodebuild -license` para revisar y aceptar la licencia antes de repetir la instalación. También puede usar los comandos de Codex de la tabla después de configurar las herramientas de línea de comandos de Apple.
 
 Después de instalar, conecte **versat** cuando el cliente solicite autenticación y pruebe una consulta de lectura en [Probar la conexión](#probar-la-conexion). Si su cliente no admite plugins, siga [Conectar al MCP de Versat](#conectar-al-mcp-de-versat) y, si desea, [instale la skill](#instalar-o-actualizar-la-skill) por separado. Si ya configuró el MCP y la skill manualmente, evite registrar una segunda conexión `versat` al instalar el plugin.
