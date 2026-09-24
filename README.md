@@ -16,6 +16,10 @@ El plugin instala **la conexión al MCP y la skill oficial** en los clientes com
 | VS Code con GitHub Copilot | Ejecute **Chat: Install Plugin From Source** e indique `https://github.com/Versat-Platform/versat_skills_mcp.git`. |
 | Cursor | En un chat del agente, escriba `/add-plugin versat-mcp@https://github.com/Versat-Platform/versat_skills_mcp.git` y siga la instalación. |
 
+En la ventana **Agregar marketplace de plugins** de Codex, escriba `Versat-Platform/versat_skills_mcp` en **Origen**, `main` en **Referencia de Git** y deje **Caminos dispersos** vacío. El plugin está en la raíz del repositorio; no use `plugins/codex`.
+
+Si macOS muestra el error de licencia de Xcode al clonar, abra Terminal y ejecute `sudo xcodebuild -license` para revisar y aceptar la licencia antes de repetir la instalación. También puede usar los comandos de Codex de la tabla después de configurar las herramientas de línea de comandos de Apple.
+
 Después de instalar, conecte **versat** cuando el cliente solicite autenticación y pruebe una consulta de lectura en [Probar la conexión](#probar-la-conexion). Si su cliente no admite plugins, siga [Conectar al MCP de Versat](#conectar-al-mcp-de-versat) y, si desea, [instale la skill](#instalar-o-actualizar-la-skill) por separado. Si ya configuró el MCP y la skill manualmente, evite registrar una segunda conexión `versat` al instalar el plugin.
 
 La instalación por plugin requiere que el servidor MCP tenga OAuth habilitado y que el cliente admita autenticación OAuth para servidores remotos. Si su instalación usa otra URL del MCP, utilice la [conexión manual](#conectar-al-mcp-de-versat) con la dirección entregada por su administrador. Consulte las guías de [Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude), [Claude Code](https://code.claude.com/docs/en/plugin-marketplaces), [Codex](https://developers.openai.com/plugins/build/plugins) y [VS Code](https://code.visualstudio.com/docs/agent-customization/agent-plugins) si cambió la interfaz de instalación.
@@ -64,6 +68,8 @@ codex mcp login versat
 ```
 
 Complete la página de Versat con su usuario y token. [Instrucciones oficiales de Codex](https://learn.chatgpt.com/docs/extend/mcp).
+
+No abra `/authorize` directamente en el navegador. Si aparece `{"error":"invalid_request"}` en esa dirección, vuelva al cliente y seleccione **Authenticate** para que Codex genere un enlace de acceso completo.
 
 ### Cursor
 
