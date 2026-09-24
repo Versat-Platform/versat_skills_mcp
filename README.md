@@ -37,7 +37,7 @@ Antes de conectar, entre al **sistema Versat con su usuario habitual** y genere 
 
 Si el token empieza por `Bearer `, también puede pegarlo completo. No introduzca el token en los campos *OAuth Client ID* o *Client Secret*. El cliente recibe una credencial del MCP; las operaciones en Versat siguen usando únicamente su token Bearer de Versat.
 
-Al pulsar **Iniciar**, espere a que el navegador muestre la confirmación de su cliente de IA. Cuando indique que la conexión terminó, puede cerrar esa pestaña y volver al agente. Si la página de Versat indica que la solicitud ya no está disponible, vuelva al agente y pulse **Conectar** otra vez.
+Al pulsar **Iniciar**, espere a que se valide el acceso y a que la página **Acceso validado** le lleve al cliente de IA. Si el navegador no avanza, pulse **Continuar en el agente**. Cuando el cliente confirme la conexión, puede cerrar esa pestaña y volver al agente. Si la página de Versat indica que la solicitud ya no está disponible, vuelva al agente y pulse **Conectar** otra vez.
 
 ### Claude: web, Desktop y Cowork
 
