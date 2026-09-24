@@ -1,12 +1,13 @@
 {
   "name": "versat-platform",
+  "description": "Plugin oficial para conectar agentes de IA con Versat.",
   "owner": {
     "name": "Versat Platform"
   },
   "plugins": [
     {
       "name": "versat-mcp",
-      "source": ".",
+      "source": "./plugins/claude/versat-mcp",
       "description": "Conecta el MCP de Versat e incluye la skill oficial para consultar y operar datos de negocio.",
       "version": "1.2.57"
     }

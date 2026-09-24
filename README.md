@@ -18,6 +18,8 @@ El plugin instala **la conexión al MCP y la skill oficial** en los clientes com
 
 En la ventana **Agregar marketplace de plugins** de Codex, escriba `Versat-Platform/versat_skills_mcp` en **Origen**, `main` en **Referencia de Git** y deje **Caminos dispersos** vacío. El plugin está en la raíz del repositorio; no use `plugins/codex`.
 
+El catálogo de Claude distribuye el plugin desde `plugins/claude/versat-mcp`. Esa carpeta ya contiene la conexión MCP y la skill, por lo que no necesita copiar archivos por separado.
+
 Si macOS muestra el error de licencia de Xcode al clonar, abra Terminal y ejecute `sudo xcodebuild -license` para revisar y aceptar la licencia antes de repetir la instalación. También puede usar los comandos de Codex de la tabla después de configurar las herramientas de línea de comandos de Apple.
 
 Después de instalar, conecte **versat** cuando el cliente solicite autenticación y pruebe una consulta de lectura en [Probar la conexión](#probar-la-conexion). Si su cliente no admite plugins, siga [Conectar al MCP de Versat](#conectar-al-mcp-de-versat) y, si desea, [instale la skill](#instalar-o-actualizar-la-skill) por separado. Si ya configuró el MCP y la skill manualmente, evite registrar una segunda conexión `versat` al instalar el plugin.

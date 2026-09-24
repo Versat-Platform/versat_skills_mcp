@@ -65,12 +65,14 @@ abort "La skill del plugin no está en el manifiesto" unless version_plugin
 plugin = JSON.parse((raiz / "plugin.json").read)
 plugin_codex = JSON.parse((raiz / ".codex-plugin/plugin.json").read)
 plugin_claude = JSON.parse((raiz / ".claude-plugin/plugin.json").read)
+paquete_claude = raiz / "plugins/claude/versat-mcp"
+plugin_claude_distribuido = JSON.parse((paquete_claude / ".claude-plugin/plugin.json").read)
 mercado_codex = JSON.parse((raiz / ".agents/plugins/marketplace.json").read)
 mercado_claude = JSON.parse((raiz / ".claude-plugin/marketplace.json").read)
 mcp_portatil = JSON.parse((raiz / "mcp.json").read)
 mcp_nativo = JSON.parse((raiz / ".mcp.json").read)
 
-[plugin, plugin_codex, plugin_claude].each do |datos|
+[plugin, plugin_codex, plugin_claude, plugin_claude_distribuido].each do |datos|
   abort "Nombre divergente en el plugin" unless datos["name"] == nombre_plugin
   abort "Versión divergente en el plugin" unless datos["version"] == version_plugin
 end
@@ -78,7 +80,14 @@ end
 abort "Ruta de skills inválida para Codex" unless plugin_codex["skills"] == "./skills/"
 abort "Ruta MCP inválida para Codex" unless plugin_codex["mcpServers"] == "./.mcp.json"
 abort "Skill no encontrada en el plugin" unless (raiz / "skills" / nombre_plugin / "SKILL.md").file?
-abort "Versión del marketplace Claude divergente" unless mercado_claude.fetch("plugins").any? { |entrada| entrada["name"] == nombre_plugin && entrada["source"] == "." && entrada["version"] == version_plugin }
+abort "Versión del marketplace Claude divergente" unless mercado_claude.fetch("plugins").any? { |entrada| entrada["name"] == nombre_plugin && entrada["source"] == "./plugins/claude/versat-mcp" && entrada["version"] == version_plugin }
+abort "Configuración MCP del plugin Claude divergente" unless (paquete_claude / ".mcp.json").read == (raiz / ".mcp.json").read
+abort "Manifiesto del plugin Claude divergente" unless (paquete_claude / ".claude-plugin/plugin.json").read == (raiz / ".claude-plugin/plugin.json").read
+manifiesto.fetch("skills").find { |skill| skill["name"] == nombre_plugin }.fetch("files").each do |archivo|
+  origen = raiz / "skills" / nombre_plugin / archivo
+  copia = paquete_claude / "skills" / nombre_plugin / archivo
+  abort "Skill del plugin Claude divergente: #{archivo}" unless copia.file? && copia.read == origen.read
+end
 abort "Marketplace Codex inválido" unless mercado_codex.fetch("plugins").any? do |entrada|
   entrada["name"] == nombre_plugin && entrada.dig("source", "source") == "local" && entrada.dig("source", "path") == "./" && entrada.dig("policy", "authentication") == "ON_INSTALL"
 end

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "versat": {
+      "type": "http",
+      "url": "https://mcp-versat.azurewebsites.net/mcp"
+    }
+  }
+}

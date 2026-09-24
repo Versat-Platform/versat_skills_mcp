@@ -1,0 +1,7 @@
+interface:
+  display_name: "Versat MCP"
+  short_description: "Consultar y operar datos de Versat"
+  default_prompt: "Usa $versat-mcp para consultar o actualizar entidades, facturas, recibos y catálogos de Versat."
+
+policy:
+  allow_implicit_invocation: true
