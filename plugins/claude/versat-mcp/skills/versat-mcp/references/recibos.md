@@ -16,6 +16,8 @@ En pruebas de inserción autorizadas, aplica el recibo al finalizar únicamente 
 
 ## Recientes
 
+Para consultar detalles, informa `filtroCampo=Financ_id` y `filtroValor` con el id entero positivo del recibo. Para `Financ_caja_cuota`, usa `filtroCampo=Financ_caja_id` con el id del movimiento padre. El vínculo es obligatorio también en `filtrosJson` y `consultaJson`: no lo sustituyas por entidad, cuenta ni id propio del detalle. Sin padre válido, el servidor devuelve `filtro_relacion_detalle_obligatorio` sin consultar Versat.
+
 Sigue [Buscar los registros más recientes](resultados.md#buscar-los-registros-más-recientes). Mantén filtros y tamaño de página; si falta un total válido, informa el alcance de los registros recuperados sin inventar la última página.
 
 ## Crear recibo

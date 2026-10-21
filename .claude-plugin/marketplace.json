@@ -9,7 +9,7 @@
       "name": "versat-mcp",
       "source": "./plugins/claude/versat-mcp",
       "description": "Conecta el MCP de Versat e incluye la skill oficial para consultar y operar datos de negocio.",
-      "version": "1.2.57"
+      "version": "1.2.58"
     }
   ]
 }

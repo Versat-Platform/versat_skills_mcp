@@ -83,6 +83,8 @@ Informa la operación ya resuelta y, cuando estén disponibles, tipo de document
 
 Para productos, cuotas, fletes, clasificaciones, bajas o remisiones de una factura, filtra por el id padre:
 
+El filtro es obligatorio: usa `filtroCampo=Factura_id` y `filtroValor` con el id entero positivo de la factura. Para subdetalles usa `Factura_clasificacion_id` o `Factura_producto_id` con el id de su detalle padre. No consultes sin este vínculo ni lo sustituyas por entidad, cuenta o id propio del detalle. También se exige dentro de `filtrosJson` y `consultaJson`; el servidor rechaza localmente los filtros inválidos con `filtro_relacion_detalle_obligatorio`.
+
 ```json
 {"detalle":"Factura_producto","filtroCampo":"Factura_id","filtroValor":"123","pagina":0,"registrosPorPagina":100}
 ```
