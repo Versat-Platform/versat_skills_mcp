@@ -1,6 +1,6 @@
 {
   "name": "versat-mcp",
-  "version": "1.2.58",
+  "version": "1.2.59",
   "description": "Conecta el MCP de Versat e incluye la skill oficial para consultar y operar datos de negocio.",
   "author": {
     "name": "Versat Platform"

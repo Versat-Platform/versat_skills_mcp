@@ -20,6 +20,14 @@ El contrato puede usar `EsExitoso`/`CodigoEstado` en resultados simples y `esExi
 
 Las señales de detención y `reintentar=false` tienen prioridad. Si falta `reintentar`, no lo supongas verdadero por el código HTTP o por un nombre `servicio_versat_*`. Un error interno tampoco implica que el usuario deba cambiar sus datos.
 
+## Solicitudes limitadas
+
+Versat admite hasta 200 solicitudes por minuto y una en ejecución por usuario. Una tool puede requerir varias solicitudes; evita invocar en paralelo operaciones del mismo usuario y no cambies credenciales para eludir el límite.
+
+Ante 429 revisa `tipoLimite`: `cuota` corresponde al máximo por minuto, `concurrencia` a otra solicitud en proceso y `capacidad` a saturación local. Respeta `retryAfterSegundos`; no confundas la espera con ausencia de datos ni con falta definitiva de permiso. Si la validación de acceso quedó bloqueada, detén esa invocación y vuelve a validar después de esperar.
+
+`solicitudEnviada=false` indica que ese envío no salió. Un 429 remoto confirmado también rechaza ese envío sin marcarlo incierto: el servidor no repite automáticamente POST/PUT. Si `reintentar=true`, una nueva invocación de la etapa rechazada puede continuar después de esperar dentro de la acción autorizada. Conserva los IDs y el borrador; revisa resultados parciales antes de continuar y no repitas el alta completa. Si `reintentar=false`, no insistas automáticamente. Una pérdida de respuesta sin rechazo confirmado mantiene la regla de escritura incierta.
+
 ## Recuperar una escritura por etapas
 
 1. Conserva el ID de cabecera, los IDs de detalles y subdetalles confirmados, sus resultados y la etapa fallida. No uses el ID de la cabecera donde corresponde el ID del detalle padre.
