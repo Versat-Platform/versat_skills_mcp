@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.59",
+      "version": "1.2.63",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -19,18 +19,20 @@
         "references/entidades.md",
         "references/facturas.md",
         "references/recibos.md",
-        "references/resultados.md"
+        "references/resultados.md",
+        "references/sugerencias.md"
       ],
       "sha256": {
-        "SKILL.md": "09eda2b359c52ef137155b48a257038d58e4446580471b13dfc22acafa5f4df4",
-        "VERSION": "fc64af1841dda3f520252aa8f2e37a24cabc4b57a00453240e9c3f1e5cda7983",
+        "SKILL.md": "ebb305c7c1fb405e7b48b75a0bbc2194ed3dede1fe936e57ec4bed9cf0816d40",
+        "VERSION": "949aa7365bf3bb9de64def1ce36896dfc317f997dbcb88a5a9d0954a70b53bde",
         "agents/openai.yaml": "6427a57175b9e8bd0b3c73097c301c8e01a493d461cf37ce4a712926b702713d",
-        "references/authentication.md": "45613a810cf02daa2982ae7ec6f796d19886a7895c061695be4b4accff7cd73e",
-        "references/catalogos.md": "c7ee95bb61ea388f1797adbc56dd798c711832453d3fccc5e2659de3fa7dfd0e",
+        "references/authentication.md": "42e026bc48549c52fd1e218581c3f5a9bd68cc5b102c4dcf7cd4b65f4b8b2e65",
+        "references/catalogos.md": "5adea85cca793b36f8d1e97aa35ec0b0f9df34fa6f648ff891a1d03ec7bfdf8e",
         "references/entidades.md": "5d25f8c1f82bdad9418055a497691613039451baf6ae0b8020d7103a43011a66",
-        "references/facturas.md": "ef398c3eb292b606cf1b2aa6740cb8e15b4e4196bce42259d15a68599b42d377",
-        "references/recibos.md": "9a82af366ed6399c503e7c8de9b9a803995587b3f6e3a842ca495fd2c9fcc8e5",
-        "references/resultados.md": "76c8dd988cd7ebdad94dc84ff30012c64fdfe8df414004bbf1ad6d3fec8d691e"
+        "references/facturas.md": "38b13256196c5d27935f4aa6a430d7b22f33e77e7e4ee8c01e96b4e5bc8dcf80",
+        "references/recibos.md": "f827b578194267895bac54d632a47ba452c304fa59c15630961734f8fdf9c27e",
+        "references/resultados.md": "2ce5b48e496f808b750442af11cf49009d225bf79bbbdf3f75d42d8518b4f575",
+        "references/sugerencias.md": "0f1db6fc29872dd73cecad8d7a1ae681dab8ef90e1043c6f8dcec4d431569cfa"
       }
     }
   ]

@@ -61,7 +61,7 @@ Si hay cabecera y detalles, usa `versat_agregar_recibo_transaccion_completo`. La
 - Título o flujo de caja para `Financ_baja`: `versat_buscar_flujos_caja_baja_titulos_recibo`, informando la entidad del recibo o transacción. Use el resultado como `Flujo_caja_id`.
 - Cuenta de movimiento de caja: `versat_buscar_cuentas_movimiento_caja_recibo`, informando solamente la moneda. No envíe el movimiento como filtro de esta consulta. Use el resultado como `Cuenta_id` de `Financ_caja`.
 - Cheque de movimiento de caja: `versat_buscar_cheques_movimiento_caja_recibo`, sin filtros adicionales. Use el resultado como `Cheque_id` de `Financ_caja`.
-- Centro de costo de movimiento de caja: `versat_buscar_centros_costo_movimiento_caja_recibo`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pida `Empresa_id` al usuario.
+- Centro de costo de movimiento de caja: `versat_buscar_centros_costo_movimiento_caja_recibo`, informando la actividad de negocio. El token determina la empresa autorizada; no pida `Empresa_id` al usuario.
 
 ## Actualizar recibo
 

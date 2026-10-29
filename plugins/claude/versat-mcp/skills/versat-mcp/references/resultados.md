@@ -40,14 +40,16 @@ Ejemplo: se crearon una factura, su clasificación y el primer centro de costo; 
 
 ## Buscar los registros más recientes
 
-La paginación natural de Versat va de antiguo a nuevo. La numeración empieza en `0`: `pagina=1` es la segunda página y también contiene registros antiguos. Las búsquedas con página predeterminada comienzan en `0`; respeta una página explícita del usuario.
+La paginación natural de Versat va de antiguo a nuevo. Las páginas `0` y `1` representan la misma primera página de registros antiguos; la siguiente distinta es `2`. Las búsquedas con página predeterminada comienzan en `0`; respeta una página explícita del usuario.
+
+Si la tool expone `ordenConsulta`, usa `Recientes` sin página ni offset explícitos; el servidor hace la navegación acotada. No omitas paginación para obtener recientes en colecciones voluminosas. Para navegación manual:
 
 1. Elige filtros y un tamaño de página admitido por la tool. Consulta `pagina=0` para obtener `infoPaginacion` cuando no dispongas de ella.
-2. Si `totalPages` es un entero positivo, consulta `totalPages - 1` con los mismos filtros y el mismo tamaño de página. Si cambias el tamaño, obtén nuevamente los metadatos antes de calcular la última página.
+2. Si `totalPages` es un entero positivo, consulta `totalPages` como última página con los mismos filtros y el mismo tamaño de página. Si cambias el tamaño, obtén nuevamente los metadatos antes de calcular la última página.
 3. Para completar la cantidad pedida, recorre las páginas anteriores necesarias, elimina duplicados por ID y verifica fechas e IDs. Ordena según la fecha pertinente a la solicitud.
 4. Si `totalPages` es cero, no solicites una página negativa. Si falta, es nulo o no es válido, no lo sustituyas por cero ni inventes la última página. Amplía la consulta solo mediante las opciones admitidas o informa que ordenaste únicamente los registros recuperados.
 
-Ejemplo: `totalPages=8` con 25 registros por página implica `pagina=7` y tamaño 25. Cambiar el tamaño a 100 conservando `pagina=7` ya no identifica la misma parte del resultado.
+Ejemplo: `totalPages=8` con 25 registros por página implica `pagina=8` y tamaño 25. Cambiar el tamaño a 100 conservando `pagina=8` ya no identifica la misma parte del resultado.
 
 Los campos de paginación nulos representan información no disponible; los registros devueltos pueden seguir siendo útiles. Para antecedentes contables, prefiere las tools `versat_buscar_ejemplos_contables_factura_*`, que recuperan referencias del recurso seleccionado.
 
@@ -57,8 +59,18 @@ En ejemplos contables, revisa `alcanceBusqueda`: identifica páginas consultadas
 
 ## Parámetros y límites del servidor
 
-`filtrosJson` y `consultaJson` solo admiten `filtro_campo`, `filtro_valor`, `pagina` y `registros_por_pagina`. BA31 mantiene `limit`/`offset` como compatibilidad traducida. Use los argumentos específicos para ids y detalles; nunca sustituya recurso, vista ni contexto. Página desde cero, tamaño entre 1 y 1000 y nombre flexible de hasta 512 caracteres.
+`filtrosJson` y `consultaJson` solo admiten `filtro_campo`, `filtro_valor`, `filtro_operador`, `pagina` y `registros_por_pagina`. BA31 mantiene `limit`/`offset` como compatibilidad traducida. Use los argumentos específicos para ids y detalles; nunca sustituya recurso ni contexto. Página desde cero, tamaño entre 1 y 1000 y nombre flexible de hasta 512 caracteres.
 
 Ante `parametro_consulta_no_permitido`, `paginacion_invalida` o `campo_actualizacion_no_permitido`, corrija la entrada según el contrato. `respuesta_versat_demasiado_grande` requiere acotar filtros o reducir el tamaño de página. Una escritura con respuesta excesiva puede haberse completado: respete `resultado_escritura_incierto` y consulte antes de repetir.
 
 El Host público no requiere una lista de destinos. Un 403 `mcp_origen_no_permitido` requiere revisar el Origin del cliente y los orígenes autorizados en el servidor. Ante 429 respete Retry-After; no rote credenciales para eludir límites.
+
+## Presupuesto compartido de lectura
+
+Cada invocación comparte límites entre sus etapas: por defecto 6 consultas lógicas simples o 12 compuestas, 5 páginas por conjunto, 2000 registros recibidos y 30 segundos. El tamaño predeterminado es 100 y el máximo por página es 1000. Los valores predeterminados pueden configurarse; los reintentos y la cuota saliente se controlan por separado.
+
+Revisa `alcanceBusqueda` para conocer consultas, volumen y límites efectivos. `presupuesto_consulta_agotado`, `limite_paginas_consulta`, `limite_registros_consulta`, `plazo_consulta_agotado`, `respuesta_pagina_excesiva` y `respuesta_consulta_invalida` son fallos de consulta, no búsquedas vacías exitosas. Precisa criterios o solicita una página concreta. No crees registros ni autorices escrituras cuya verificación esté incompleta. Ante `paginacion_consulta_inestable`, vuelve a obtener metadatos con los mismos filtros y tamaño.
+
+`filtro_operador` admite Igual, Diferente o Contiene únicamente en campos textuales confirmados por la tool y requiere campo y valor. No se aplica a fechas o ids. No añadas argumentos no expuestos a las selecciones específicas.
+
+El arranque admite consultas inmediatamente. Solo se espera ante cuota, concurrencia o un Retry-After real. Las selecciones que exponen `pagina` y `registrosPorPagina` tienen navegación verificada; conserva sus filtros de elegibilidad. Un filtro textual genérico no se aplica a una selección por analogía con otros catálogos.

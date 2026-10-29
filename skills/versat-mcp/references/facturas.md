@@ -223,11 +223,12 @@ Reglas:
 - Operación de cabecera AG91: `versat_buscar_operaciones_documento_factura_granos`, informando el tipo de documento previamente resuelto.
 - Operación de cabecera AI71: `versat_buscar_operaciones_documento_factura_insumos`, informando el tipo de documento previamente resuelto.
 - Factura de referencia de cabecera AI71: `versat_buscar_facturas_referencia_insumos`, informando entidad y zafra. Use `zafraId=0` solo cuando no deba restringirse por zafra.
-- Tipo de pedido de cabecera AI71: `versat_buscar_tipos_pedido_factura_insumos`, informando la entidad. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Tipo de pedido de cabecera AI71: `versat_buscar_tipos_pedido_factura_insumos`, informando la entidad. El token determina la empresa autorizada; no pidas `Empresa_id` al usuario.
 - Producto facturado AI71: `versat_buscar_productos_factura_insumos`, informando el depósito. Use el resultado como `Producto_id` de `Factura_producto`; la búsqueda excluye productos inactivos.
 - Tributación de producto facturado AI71: `versat_buscar_tributaciones_producto_factura_insumos`, informando el tipo de documento. Use el resultado como `Tributacion_id` de `Factura_producto`.
-- Producto de pedido para facturar AI71: `versat_buscar_pedidos_producto_factura_insumos`, informando entidad, producto, zafra y si es devolución. La devolución se filtra localmente porque no es un filtro admitido por la consulta. Use `zafraId=0` para omitir el filtro de zafra.
-- Centro de costo de producto facturado AI71: `versat_buscar_centros_costo_producto_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Producto de pedido para facturar AI71: `versat_buscar_pedidos_producto_factura_insumos`, informando entidad, producto, zafra y si es devolución. El servidor omite la restricción de zafra cuando vale cero y aplica localmente Tiene_saldo: Si admite pedidos con o sin saldo; No exige saldo confirmado. No seleccione registros sin información de saldo ni sustituya esta condición por Devolucion_sn. Conserve página y tamaño al continuar; los totales remotos corresponden a los registros anteriores al filtro local.
+- En referencias de facturas AI71/AG91 y contratos AG91, zafra cero también omite la restricción; un valor positivo se conserva. Esta regla se aplica a filtros opcionales de id, no a página cero ni a importes de escrituras.
+- Centro de costo de producto facturado AI71: `versat_buscar_centros_costo_producto_factura_insumos`, informando la actividad de negocio. El token determina la empresa autorizada; no pidas `Empresa_id` al usuario.
 - Tributación de Fletes y Seguros AI71: `versat_buscar_tributaciones_flete_factura_insumos`, informando el tipo de documento.
 - Centro de costo de Fletes y Seguros AI71: `versat_buscar_centros_costo_flete_factura_insumos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada.
 - Cuenta de clasificación contable AI71: `versat_buscar_cuentas_clasificacion_factura_insumos`, informando moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable. Esta búsqueda es distinta de la cuenta de cabecera.
@@ -238,7 +239,7 @@ Reglas:
 - Cheque de cabecera AG91: `versat_buscar_cheques_factura_granos`. La consulta no requiere filtros adicionales.
 - Producto facturado AG91: `versat_buscar_productos_factura_granos`, informando el depósito. Use el resultado como `Producto_id` de `Factura_producto`; la búsqueda excluye productos inactivos.
 - Tributación de producto facturado AG91: `versat_buscar_tributaciones_producto_factura_granos`, informando el tipo de documento. Use el resultado como `Tributacion_id` de `Factura_producto`.
-- Centro de costo de producto facturado AG91: `versat_buscar_centros_costo_producto_factura_granos`, informando la actividad de negocio. La tool aplica internamente la empresa autorizada; no pidas `Empresa_id` al usuario.
+- Centro de costo de producto facturado AG91: `versat_buscar_centros_costo_producto_factura_granos`, informando la actividad de negocio. El token determina la empresa autorizada; no pidas `Empresa_id` al usuario.
 - Tributación de Fletes y Seguros AG91: `versat_buscar_tributaciones_flete_factura_granos`, informando el tipo de documento.
 - Cuenta de clasificación contable AG91: `versat_buscar_cuentas_clasificacion_factura_granos`, informando moneda y operación. La tool usa `Moneda_id`; no envíe `Moneda_doc_id` ni sentido contable.
 - Tributación de clasificación contable AG91: `versat_buscar_tributaciones_clasificacion_factura_granos`, informando el tipo de documento.

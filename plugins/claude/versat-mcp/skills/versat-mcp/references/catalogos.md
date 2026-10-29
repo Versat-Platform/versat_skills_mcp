@@ -28,7 +28,7 @@ Usa esta referencia para resolver ids antes de crear o actualizar documentos. No
 ## Flujo seguro
 
 1. Identifica el catálogo requerido por el contrato del campo y recurso. Usa su tool específica cuando exista; una cuenta válida en un catálogo general puede no servir para una cabecera, clasificación contable o movimiento de caja.
-2. Busca por el nombre informado por el usuario.
+2. Busca por el nombre informado por el usuario. Cuando la tool exponga `buscarPor`, usa Nombre o Codigo según el dato disponible; Auto respeta los campos propios del recurso. Cuentas, productos y monedas pueden admitir código; revisa el contrato. No conviertas códigos numéricos en ids.
 3. Si existe una coincidencia clara, usa su id sin pedirlo al usuario.
 4. Si hay varias coincidencias razonables, muestra de dos a cinco opciones con nombres amigables y pide confirmacion.
 5. Si no hay coincidencias, informa el criterio usado y pide un dato distintivo; no inventes ids.
@@ -55,7 +55,7 @@ En las búsquedas específicas de timbrado por factura, informa únicamente el c
 
 ## Empresa actual
 
-Para consultas sobre "mi empresa", usa `versat_buscar_empresas`. La tool limita la consulta a la empresa autorizada; no la conviertas en una busqueda libre por nombre ni permitas elegir otra empresa.
+Para consultas sobre "mi empresa", usa `versat_buscar_empresas`. La tool publica únicamente la empresa autorizada por el token y no envía empresa en la URL; no la conviertas en una busqueda libre por nombre ni permitas elegir otra empresa.
 
 `OX01` es solo lectura. No intentes crear, actualizar ni eliminar empresas.
 
@@ -68,3 +68,9 @@ Usa las tools publicas normalmente para cuentas, tributacion, operaciones y otro
 Si falta la cotización del día, consulta `versat_buscar_cotizaciones_monedas` con fecha y tipo. Resuelve el tipo con `versat_buscar_tipos_cotizacion`; si no existe cotización, pide los valores de compra y venta y propone `versat_agregar_cotizacion_moneda`. No inventes importes ni crees una cotización sin autorización.
 
 Ante errores o resultados ambiguos, aplica [Resultados y recuperación](resultados.md). Si no se pudo validar empresa o modelo, no sustituyas el contexto autorizado por un ID elegido por el usuario.
+
+## Alcance de las búsquedas
+
+Las colecciones paginables usan página 0 y 100 registros por defecto, según configuración. Conserva filtros y tamaño al continuar. Solo entidades y RUCs usan variantes personales o societarias. Los demás catálogos evitan esa expansión.
+
+Las selecciones específicas de documentos conservan sus parámetros de elegibilidad. Usa `pagina` y `registrosPorPagina` en las selecciones que los exponen. No agregues texto o parámetros ausentes del contrato, ni sustituyas sus resultados por un catálogo general. Revisa `alcanceBusqueda`: un límite o volumen excesivo requiere precisar la consulta, y una muestra vacía no demuestra inexistencia global.
