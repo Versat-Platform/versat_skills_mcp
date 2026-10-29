@@ -41,3 +41,5 @@ Para errores de disponibilidad sin bloqueo de acceso, aplica [Resultados y recup
 - Validación indeterminada: “No fue posible validar el acceso en este momento; la operación no puede continuar todavía.”
 
 No copies headers de autenticación, tokens parciales, cuerpos técnicos, nombres de excepciones ni URLs con valores de filtros.
+
+No informe empresa mediante argumentos o filtros. Las consultas normales, inserciones y actualizaciones no envían empresa en la URL; cuando una selección la requiere, el servidor la obtiene del contexto autorizado del token. El MCP conserva el contexto derivado del token para validar acceso y restringir los resultados publicados.

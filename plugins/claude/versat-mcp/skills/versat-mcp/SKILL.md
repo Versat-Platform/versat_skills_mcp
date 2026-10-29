@@ -16,6 +16,7 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 | Consultar o modificar clientes, proveedores y datos relacionados | [Entidades](references/entidades.md); `versat_consultar_entidad` para consultas de negocio |
 | Crear, duplicar, actualizar o procesar facturas | [Facturas](references/facturas.md); distingue financiera AF31, insumos AI71 y granos AG91 |
 | Crear, actualizar o procesar recibos y transacciones | [Recibos](references/recibos.md); AF51 y sus detalles |
+| Preparar un borrador y sugerir datos desde antecedentes recientes | [Sugerencias históricas](references/sugerencias.md); `versat_preparar_registro` |
 | Resolver monedas, cuentas, operaciones, timbrados u otros IDs | [Catálogos](references/catalogos.md); prefiere la tool específica del campo y recurso |
 | Interpretar errores, recuperar una creación parcial o buscar registros recientes | [Resultados y recuperación](references/resultados.md) |
 | Resolver autenticación o bloqueo de acceso | [Autenticación](references/authentication.md) |
@@ -25,8 +26,9 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 1. Identifica la acción y el recurso. Si el tipo de factura sigue ambiguo después de consultar `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`, pregunta si es financiera, de insumos o de granos.
 2. Resuelve los datos ya informados mediante búsquedas. Pide solo datos de negocio faltantes o una elección entre coincidencias razonables. Una autorización ya dada no exige otra confirmación para la misma acción.
 3. Antes de escribir, consulta el contrato de campos. Muchas tools de alta lo devuelven sin JSON; comprueba esa posibilidad en la descripción vigente. Resuelve IDs mediante catálogos, sin inventarlos ni pedirlos al usuario cuando puedas buscarlos.
-4. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador`; aplicar, desaplicar y anular usan tools de procesamiento.
-5. Evalúa el resultado global y cualquier resultado parcial antes de continuar. Informa qué se creó, qué falta y el estado verificado.
+4. Si faltan datos y ya conoces entidad y operación, usa `versat_preparar_registro` con el borrador parcial para obtener sugerencias verificadas. En caja AF51 usa entidad, Entrada/Salida y moneda; la factura vinculada conserva su operación. Revisa evidencias, grupos y pendientes, conserva los valores explícitos y resuelve las ambigüedades relevantes.
+5. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador`; aplicar, desaplicar y anular usan tools de procesamiento.
+6. Evalúa el resultado global y cualquier resultado parcial antes de continuar. Informa qué se creó, qué falta y el estado verificado.
 
 ## Decisiones que cambian el flujo
 
@@ -35,9 +37,11 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 - **Solicitudes limitadas:** ante 429, espera `retryAfterSegundos` y revisa `tipoLimite`. Un rechazo confirmado no implica escritura incierta; no repitas etapas exitosas ni el alta completa. Consulta [Resultados y recuperación](references/resultados.md) para continuar sobre el mismo borrador.
 - **Reintentos:** `reintentar=false` impide repetir la misma llamada sin cambios. El prefijo `servicio_versat_` por sí solo no significa fallo temporal. Con `reintentar=true`, espera el plazo indicado; en escrituras, verifica primero si hubo registros o cambios ya confirmados. Aplica [Resultados y recuperación](references/resultados.md).
 - **Corrección indicada:** usa `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente` sobre el borrador existente. Verifica la corrección antes de repetir `Aplicar`; no crees un sustituto.
-- **Búsquedas:** las tools ya intentan coincidencias flexibles. Usa `coincidencias`, `coincidenciaPrincipal` y totales; no multipliques variantes si hay resultados útiles. Pregunta únicamente cuando la ambigüedad afecte a la acción.
-- **Recientes:** la página 0 contiene registros antiguos. Mantén filtros y tamaño de página al usar `totalPages`; si falta ese dato, no inventes la última página ni presentes una muestra como el conjunto completo.
+- **Búsquedas:** usa `buscarPor=Nombre|Codigo` cuando la tool lo admita; `Auto` elige campos según el recurso. Un código numérico no es un id. Solo entidades y RUCs usan variantes personales o societarias. Revisa `coincidencias`, `coincidenciaPrincipal` y `alcanceBusqueda`; no multipliques variantes cuando haya resultados útiles. Una muestra vacía no prueba ausencia global.
+- **Recientes:** las páginas 0 y 1 representan la misma primera página de registros antiguos; la última es `totalPages` si el total es positivo. Si la tool expone `ordenConsulta`, usa `Recientes` sin página ni offset explícitos. Mantén filtros y tamaño; no omitas paginación en recursos voluminosos. Si faltan totales válidos, no inventes la última página ni presentes una muestra como el conjunto completo. Ante paginación inestable, vuelve a obtener metadatos.
+- **Consulta incompleta:** un presupuesto, plazo o volumen agotado devuelve error y alcance. Acota criterios o pide una página concreta; no lo interpretes como ausencia ni autorices escrituras que dependan de una verificación incompleta. Las selecciones específicas solo admiten los argumentos que expone su contrato.
 - **RUC:** consulta `versat_buscar_rucs` y usa el ID devuelto como `Ruc_id` en BA31. `Ruc_uk` no es un filtro de entidades.
+- **Contexto de empresa:** nunca informes empresa en URLs de consultas, inserciones o actualizaciones; el token define el contexto. El servidor valida el contexto y bloquea empresas indicadas manualmente.
 - **Mi empresa:** usa `versat_buscar_empresas`; OX01 es de solo lectura y corresponde exclusivamente a la empresa autorizada. No solicites otra empresa o modelo para sustituir ese contexto.
 - **Notificaciones de diagnóstico:** si el usuario administra el MCP y no puede ver logs, usa `versat_verificar_notificacion_diagnostico` para consultar el estado seguro. Solo usa `enviarPrueba=true` cuando solicite comprobar el envío. Informa si el webhook aceptó, rechazó o no respondió; no pidas ni muestres su URL, credencial, el JSON enviado a Versat ni la respuesta técnica incluida en la notificación interna.
 
