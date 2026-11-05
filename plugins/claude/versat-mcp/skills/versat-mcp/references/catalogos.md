@@ -74,3 +74,11 @@ Ante errores o resultados ambiguos, aplica [Resultados y recuperación](resultad
 Las colecciones paginables usan página 0 y 100 registros por defecto, según configuración. Conserva filtros y tamaño al continuar. Solo entidades y RUCs usan variantes personales o societarias. Los demás catálogos evitan esa expansión.
 
 Las selecciones específicas de documentos conservan sus parámetros de elegibilidad. Usa `pagina` y `registrosPorPagina` en las selecciones que los exponen. No agregues texto o parámetros ausentes del contrato, ni sustituyas sus resultados por un catálogo general. Revisa `alcanceBusqueda`: un límite o volumen excesivo requiere precisar la consulta, y una muestra vacía no demuestra inexistencia global.
+
+## Recursos humanos
+
+Para AR05, resuelve Centro_costo_id exclusivamente con `versat_buscar_centros_costo_contrato_trabajo`, según su actividad y contexto autorizado. Usa las tools de cargos, escalas y tipos de contrato para las otras referencias. Para AR11, operaciones y eventos se obtienen con `versat_buscar_operaciones_hoja_pago` y `versat_buscar_eventos_hoja_pago`; los eventos de una operación se consultan con `versat_listar_eventos_operacion_hoja_pago`. Consulta [Recursos humanos](recursos-humanos.md) para los vínculos entre hoja, funcionario y evento.
+
+Los siete catálogos OR permiten también mantenimiento autorizado: profesiones OR51 y feriados OR65 completan eventos, operaciones, cargos, escalas y tipos de contrato. OR31, OR61 y OR65 incluyen detalles y altas completas con verificación del padre nuevo. Horarios y Dia_mes son strings sin máscara; OR65 se lista por año/id. Consulta [Recursos humanos](recursos-humanos.md) antes de crear o editar y conserva ids ante parciales.
+
+En horarios OR61, Dia_semana admite varios días documentados separados por coma sin repetir. Las cuentas OX03 compartidas sin empresa se aceptan únicamente por modelo autorizado coincidente; una empresa ajena no nula sigue bloqueada.

@@ -10,7 +10,7 @@ El contrato puede usar `EsExitoso`/`CodigoEstado` en resultados simples y `esExi
 | --- | --- |
 | `debeDetenerse=true` o `accesoMcp=false` | Detén las tools de negocio. Distingue el motivo mediante [Autenticación](authentication.md). `indeterminado` significa que no se pudo validar el acceso. |
 | `401`, `Auth required` o `mcp_http_bearer_ausente_o_invalido` | Revisa la configuración de credenciales del cliente. No interpretes el fallo como ausencia de registros. |
-| `resultado_escritura_incierto` o `resultadoIncierto=true` | La escritura pudo completarse; no se repite automáticamente. Consulta el registro y sus detalles para determinar qué se guardó antes de completar lo faltante. |
+| `resultado_escritura_incierto` o `resultadoIncierto=true` | La escritura pudo completarse; no se repite automáticamente. Concilia antes de continuar; consulta solo registros consultables. Una consulta vacía no descarta un Borrador. Sigue el flujo de recuperación de abajo. |
 | `reintentar=false` | No repitas la misma llamada sin cambios. Si hay una corrección de negocio, aplícala al borrador existente y verifícala. |
 | `servicio_versat_error_interno` sin corrección indicada | Conserva IDs y contexto de negocio para diagnóstico. No inventes un dato faltante ni lo trates como reintentable por su prefijo. |
 | `reintentar=true` sin bloqueo | Espera `retryAfterSegundos` si es válido y positivo; en su ausencia, espera unos segundos. En consultas, haz un reintento y, si persiste el fallo, informa la indisponibilidad. En escrituras, aplica el flujo de recuperación de abajo. |
@@ -31,8 +31,8 @@ Ante 429 revisa `tipoLimite`: `cuota` corresponde al máximo por minuto, `concur
 ## Recuperar una escritura por etapas
 
 1. Conserva el ID de cabecera, los IDs de detalles y subdetalles confirmados, sus resultados y la etapa fallida. No uses el ID de la cabecera donde corresponde el ID del detalle padre.
-2. Si una etapa falla después de crear registros, consulta esos registros y compara lo existente con lo solicitado. No repitas la tool completa: podría crear otra cabecera y duplicar detalles.
-3. Corrige el registro existente o crea únicamente los detalles que verificaste como faltantes. Si la respuesta no trajo el ID de una etapa exitosa, localiza el registro con sus datos de negocio; resuelve cualquier ambigüedad antes de escribir.
+2. Si una etapa falla después de crear registros, compara los IDs, vínculos y resultados confirmados con lo solicitado. En recursos con Status, el Borrador no aparece en consultas, incluso por ID, hasta aplicar; una consulta vacía no invalida una creación confirmada. En recursos consultables, consulta lo existente. No repitas la tool completa: podría crear otra cabecera y duplicar detalles.
+3. Corrige el registro existente o crea únicamente los detalles pendientes confirmados, usando el ID del padre devuelto por su alta. Si la respuesta no trajo ese ID, detén las escrituras dependientes y concilia por un medio autorizado; una consulta vacía no resuelve la incertidumbre de un Borrador. Si la tool exige una lectura imposible antes de aplicar, informa el bloqueo sin eludir sus validaciones. No inventes IDs ni apliques un documento incompleto para hacerlo visible.
 4. Si hubo timeout o pérdida de respuesta y no puedes determinar si la escritura se completó, informa que el resultado es incierto. No afirmes que falló sin crear datos ni envíes otra alta a ciegas.
 5. Aplica o procesa solo cuando todas las etapas requeridas estén completas y esa acción esté autorizada. En un rechazo de procesamiento, corrige y verifica el mismo borrador antes de volver a aplicar.
 
@@ -74,3 +74,7 @@ Revisa `alcanceBusqueda` para conocer consultas, volumen y límites efectivos. `
 `filtro_operador` admite Igual, Diferente o Contiene únicamente en campos textuales confirmados por la tool y requiere campo y valor. No se aplica a fechas o ids. No añadas argumentos no expuestos a las selecciones específicas.
 
 El arranque admite consultas inmediatamente. Solo se espera ante cuota, concurrencia o un Retry-After real. Las selecciones que exponen `pagina` y `registrosPorPagina` tienen navegación verificada; conserva sus filtros de elegibilidad. Un filtro textual genérico no se aplica a una selección por analogía con otros catálogos.
+
+## Alertas de diagnóstico
+
+El diagnóstico excluye rechazos operativos reconocidos aunque el servicio los devuelva con HTTP 500: campos/cuentas/detalles obligatorios, selección de datos, saldo o stock insuficiente y duplicados. Las referencias nulas, excepciones técnicas explícitas y fallos desconocidos con HTTP 500 conservan su alerta. Una mezcla de validación y causa técnica o desconocida también conserva la alerta; no asumas que todo texto es un rechazo operativo. El filtro no cambia la respuesta de negocio ni sus señales de reintento.
