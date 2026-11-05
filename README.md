@@ -174,6 +174,7 @@ La entrada [versat-mcp](skills/versat-mcp/SKILL.md) selecciona el flujo y carga 
 | [Entidades](skills/versat-mcp/references/entidades.md) | Personas, empresas, documentos y datos relacionados |
 | [Facturas](skills/versat-mcp/references/facturas.md) | Insumos, granos y facturas financieras |
 | [Recibos](skills/versat-mcp/references/recibos.md) | Recibos, movimientos de caja, cuotas y facturas vinculadas |
+| [Recursos humanos](skills/versat-mcp/references/recursos-humanos.md) | AR05, AR11 y AR51; siete catálogos OR, sus detalles y recuperación de altas parciales |
 | [Catálogos](skills/versat-mcp/references/catalogos.md) | Resolver IDs compatibles con el campo y recurso |
 | [Resultados y recuperación](skills/versat-mcp/references/resultados.md) | Errores, reintentos, creaciones parciales y paginación |
 | [Autenticación](skills/versat-mcp/references/authentication.md) | Credenciales, denegación y validación de acceso indeterminada |

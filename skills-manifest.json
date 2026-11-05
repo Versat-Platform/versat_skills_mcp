@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.63",
+      "version": "1.2.70",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -20,19 +20,21 @@
         "references/facturas.md",
         "references/recibos.md",
         "references/resultados.md",
-        "references/sugerencias.md"
+        "references/sugerencias.md",
+        "references/recursos-humanos.md"
       ],
       "sha256": {
-        "SKILL.md": "ebb305c7c1fb405e7b48b75a0bbc2194ed3dede1fe936e57ec4bed9cf0816d40",
-        "VERSION": "949aa7365bf3bb9de64def1ce36896dfc317f997dbcb88a5a9d0954a70b53bde",
-        "agents/openai.yaml": "6427a57175b9e8bd0b3c73097c301c8e01a493d461cf37ce4a712926b702713d",
+        "SKILL.md": "83948023b62fd737be7a9b371cdad4a7e3a265a91770c724b0c496449b1cdfb2",
+        "VERSION": "ba4daa5b3bb79bf423baf720c8dcb34b28aa0f3737cd1281db719405d1633cd5",
+        "agents/openai.yaml": "2f844ecb1d9aaecfb640194809797e65073c1a8ee827d30014343cc563a2df9a",
         "references/authentication.md": "42e026bc48549c52fd1e218581c3f5a9bd68cc5b102c4dcf7cd4b65f4b8b2e65",
-        "references/catalogos.md": "5adea85cca793b36f8d1e97aa35ec0b0f9df34fa6f648ff891a1d03ec7bfdf8e",
+        "references/catalogos.md": "cd73bbbffec3f10017ecfcd6646e5ba6f1e9fe99f527ed2aae531dfaf7cae6c1",
         "references/entidades.md": "5d25f8c1f82bdad9418055a497691613039451baf6ae0b8020d7103a43011a66",
         "references/facturas.md": "38b13256196c5d27935f4aa6a430d7b22f33e77e7e4ee8c01e96b4e5bc8dcf80",
         "references/recibos.md": "f827b578194267895bac54d632a47ba452c304fa59c15630961734f8fdf9c27e",
-        "references/resultados.md": "2ce5b48e496f808b750442af11cf49009d225bf79bbbdf3f75d42d8518b4f575",
-        "references/sugerencias.md": "0f1db6fc29872dd73cecad8d7a1ae681dab8ef90e1043c6f8dcec4d431569cfa"
+        "references/resultados.md": "e90bc10bd046a62f1ff03314626c1039f4592bec3dc540469a0d860a880ff463",
+        "references/sugerencias.md": "0f1db6fc29872dd73cecad8d7a1ae681dab8ef90e1043c6f8dcec4d431569cfa",
+        "references/recursos-humanos.md": "8b537e234fe9f51036e7ca19716c97389172c437840ebe801853e25f470a49f0"
       }
     }
   ]

@@ -1,6 +1,6 @@
 ---
 name: versat-mcp
-description: "Consultar y operar entidades, facturas, recibos y catálogos mediante las tools del MCP Versat; interpretar sus resultados y resolver problemas de acceso. Usar para tareas de negocio con Versat, no para desarrollo genérico del servidor."
+description: "Consultar y operar entidades, facturas, recibos, recursos humanos y catálogos mediante las tools del MCP Versat; interpretar sus resultados y resolver problemas de acceso. Usar para tareas de negocio con Versat, no para desarrollo genérico del servidor."
 ---
 
 # Versat MCP
@@ -16,6 +16,8 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 | Consultar o modificar clientes, proveedores y datos relacionados | [Entidades](references/entidades.md); `versat_consultar_entidad` para consultas de negocio |
 | Crear, duplicar, actualizar o procesar facturas | [Facturas](references/facturas.md); distingue financiera AF31, insumos AI71 y granos AG91 |
 | Crear, actualizar o procesar recibos y transacciones | [Recibos](references/recibos.md); AF51 y sus detalles |
+| Consultar o mantener contratos de trabajo, hojas de pago y vacaciones | [Recursos humanos](references/recursos-humanos.md); AR05, AR11 con funcionarios/eventos y AR51 |
+| Consultar o mantener eventos, operaciones de hoja, cargos, profesiones, escalas, tipos de contrato o feriados | [Recursos humanos](references/recursos-humanos.md); OR11, OR31, OR41, OR51, OR61, OR62 y OR65, con sus detalles |
 | Preparar un borrador y sugerir datos desde antecedentes recientes | [Sugerencias históricas](references/sugerencias.md); `versat_preparar_registro` |
 | Resolver monedas, cuentas, operaciones, timbrados u otros IDs | [Catálogos](references/catalogos.md); prefiere la tool específica del campo y recurso |
 | Interpretar errores, recuperar una creación parcial o buscar registros recientes | [Resultados y recuperación](references/resultados.md) |
@@ -26,14 +28,14 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 1. Identifica la acción y el recurso. Si el tipo de factura sigue ambiguo después de consultar `versat_sugerir_tipo_factura` o `versat_listar_tipos_factura`, pregunta si es financiera, de insumos o de granos.
 2. Resuelve los datos ya informados mediante búsquedas. Pide solo datos de negocio faltantes o una elección entre coincidencias razonables. Una autorización ya dada no exige otra confirmación para la misma acción.
 3. Antes de escribir, consulta el contrato de campos. Muchas tools de alta lo devuelven sin JSON; comprueba esa posibilidad en la descripción vigente. Resuelve IDs mediante catálogos, sin inventarlos ni pedirlos al usuario cuando puedas buscarlos.
-4. Si faltan datos y ya conoces entidad y operación, usa `versat_preparar_registro` con el borrador parcial para obtener sugerencias verificadas. En caja AF51 usa entidad, Entrada/Salida y moneda; la factura vinculada conserva su operación. Revisa evidencias, grupos y pendientes, conserva los valores explícitos y resuelve las ambigüedades relevantes.
-5. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador`; aplicar, desaplicar y anular usan tools de procesamiento.
+4. En AF31, AI71, AG91 o AF51, si faltan datos y ya conoces entidad y operación, usa `versat_preparar_registro` con el borrador parcial para obtener sugerencias verificadas. En caja AF51 usa entidad, Entrada/Salida y moneda; la factura vinculada conserva su operación. Revisa evidencias, grupos y pendientes, conserva los valores explícitos y resuelve las ambigüedades relevantes.
+5. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador` y no son consultables hasta aplicar: conserva cada ID confirmado para vincular detalles y subdetalles. Aplicar, desaplicar y anular usan tools de procesamiento; no apliques un registro incompleto para localizarlo.
 6. Evalúa el resultado global y cualquier resultado parcial antes de continuar. Informa qué se creó, qué falta y el estado verificado.
 
 ## Decisiones que cambian el flujo
 
 - **Acceso bloqueado:** `debeDetenerse=true` o `accesoMcp=false` impiden continuar con tools de negocio. Usa `estadoValidacionMcp` y el código para distinguir acceso denegado, autenticación rechazada y validación indeterminada; no atribuyas falta de permiso a un timeout.
-- **Escritura incierta:** `resultado_escritura_incierto` o `resultadoIncierto=true` exigen consultar lo creado antes de otra escritura. El servidor no repite automáticamente el envío y devuelve `reintentar=false`; no crees un sustituto ni repitas el alta completa.
+- **Escritura incierta:** `resultado_escritura_incierto` o `resultadoIncierto=true` exigen conciliar lo creado antes de otra escritura. En recursos con Status, una consulta vacía no resuelve la incertidumbre porque el Borrador no es consultable. Sin ID confirmado detén las escrituras dependientes y solicita conciliación por un medio autorizado. El servidor no repite automáticamente el envío y devuelve `reintentar=false`; no crees un sustituto ni repitas el alta completa.
 - **Solicitudes limitadas:** ante 429, espera `retryAfterSegundos` y revisa `tipoLimite`. Un rechazo confirmado no implica escritura incierta; no repitas etapas exitosas ni el alta completa. Consulta [Resultados y recuperación](references/resultados.md) para continuar sobre el mismo borrador.
 - **Reintentos:** `reintentar=false` impide repetir la misma llamada sin cambios. El prefijo `servicio_versat_` por sí solo no significa fallo temporal. Con `reintentar=true`, espera el plazo indicado; en escrituras, verifica primero si hubo registros o cambios ya confirmados. Aplica [Resultados y recuperación](references/resultados.md).
 - **Corrección indicada:** usa `accionRequerida`, `campoPendiente`, `herramientaSugerida` e `instruccionParaAgente` sobre el borrador existente. Verifica la corrección antes de repetir `Aplicar`; no crees un sustituto.
@@ -43,7 +45,9 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 - **RUC:** consulta `versat_buscar_rucs` y usa el ID devuelto como `Ruc_id` en BA31. `Ruc_uk` no es un filtro de entidades.
 - **Contexto de empresa:** nunca informes empresa en URLs de consultas, inserciones o actualizaciones; el token define el contexto. El servidor valida el contexto y bloquea empresas indicadas manualmente.
 - **Mi empresa:** usa `versat_buscar_empresas`; OX01 es de solo lectura y corresponde exclusivamente a la empresa autorizada. No solicites otra empresa o modelo para sustituir ese contexto.
-- **Notificaciones de diagnóstico:** si el usuario administra el MCP y no puede ver logs, usa `versat_verificar_notificacion_diagnostico` para consultar el estado seguro. Solo usa `enviarPrueba=true` cuando solicite comprobar el envío. Informa si el webhook aceptó, rechazó o no respondió; no pidas ni muestres su URL, credencial, el JSON enviado a Versat ni la respuesta técnica incluida en la notificación interna.
+- **Notificaciones de diagnóstico:** si el usuario administra el MCP y no puede ver logs, usa `versat_verificar_notificacion_diagnostico` para consultar el estado seguro. Solo usa `enviarPrueba=true` cuando solicite comprobar el envío. Informa si el webhook aceptó, rechazó o no respondió; no pidas ni muestres su URL, credencial, el JSON enviado a Versat ni la respuesta técnica incluida en la notificación interna. Los rechazos operativos reconocidos se excluyen incluso con HTTP 500; fallos técnicos/desconocidos y referencias nulas conservan la alerta. La selección no cambia la respuesta pública ni autoriza reintentos.
+
+- **Catálogos de RR. HH.:** OR11/OR31/OR41/OR51/OR61/OR62/OR65 admiten mantenimiento autorizado y tres tipos de detalle. Consulta [Recursos humanos](references/recursos-humanos.md); no informes contexto ni Status, conserva horarios y Dia_mes como strings y no repitas altas completas parciales.
 
 ## Comunicar el resultado
 
