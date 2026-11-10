@@ -82,3 +82,11 @@ Para AR05, resuelve Centro_costo_id exclusivamente con `versat_buscar_centros_co
 Los siete catálogos OR permiten también mantenimiento autorizado: profesiones OR51 y feriados OR65 completan eventos, operaciones, cargos, escalas y tipos de contrato. OR31, OR61 y OR65 incluyen detalles y altas completas con verificación del padre nuevo. Horarios y Dia_mes son strings sin máscara; OR65 se lista por año/id. Consulta [Recursos humanos](recursos-humanos.md) antes de crear o editar y conserva ids ante parciales.
 
 En horarios OR61, Dia_semana admite varios días documentados separados por coma sin repetir. Las cuentas OX03 compartidas sin empresa se aceptan únicamente por modelo autorizado coincidente; una empresa ajena no nula sigue bloqueada.
+
+## Referencias de documentos de insumos
+
+Para AI15 usa `versat_buscar_motivos_cancelacion_pedido`; para fidelización AI11, `versat_buscar_campanas_marketing`. Son de solo lectura. Los títulos AI81 se resuelven con `versat_buscar_titulos_pagare_insumos` por entidad/moneda/zafra opcional; no uses una selección de recibos como sustituto. Consulta [Documentos de insumos](insumos.md).
+
+## Productos y catálogos OB/BP
+
+[Productos y catálogos](productos.md) describe la gestión OB10/OB16/OB32/OB61/OB65/OB88/OB89 y BP41/BP51/BP71, sus relaciones, listas y altas completas. Para materiales usa versat_buscar_materiales; la búsqueda BP51 anterior permanece. Usuario_id del detalle OB65 se resuelve con versat_buscar_usuarios_restriccion_linea entre usuarios elegibles de la empresa autorizada; la selección completa se valida antes de escribir. No se limita al usuario autenticado del MCP y no publica credenciales.

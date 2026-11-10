@@ -5,7 +5,7 @@
   "skills": [
     {
       "name": "versat-mcp",
-      "version": "1.2.70",
+      "version": "1.2.77",
       "path": "skills/versat-mcp",
       "versionFile": "skills/versat-mcp/VERSION",
       "entrypoint": "skills/versat-mcp/SKILL.md",
@@ -21,20 +21,24 @@
         "references/recibos.md",
         "references/resultados.md",
         "references/sugerencias.md",
-        "references/recursos-humanos.md"
+        "references/recursos-humanos.md",
+        "references/insumos.md",
+        "references/productos.md"
       ],
       "sha256": {
-        "SKILL.md": "83948023b62fd737be7a9b371cdad4a7e3a265a91770c724b0c496449b1cdfb2",
-        "VERSION": "ba4daa5b3bb79bf423baf720c8dcb34b28aa0f3737cd1281db719405d1633cd5",
+        "SKILL.md": "391ba658689d1ef5efcdf8d2e39565e47d8a87999c352ea9567d3ab4133fe102",
+        "VERSION": "8e08d78b8829bc36a4fe873894daa61571beba1db41b3ecf8af81c6ad3bfaf9b",
         "agents/openai.yaml": "2f844ecb1d9aaecfb640194809797e65073c1a8ee827d30014343cc563a2df9a",
         "references/authentication.md": "42e026bc48549c52fd1e218581c3f5a9bd68cc5b102c4dcf7cd4b65f4b8b2e65",
-        "references/catalogos.md": "cd73bbbffec3f10017ecfcd6646e5ba6f1e9fe99f527ed2aae531dfaf7cae6c1",
+        "references/catalogos.md": "4f6c44c482c8e2851db7c038cc7b35a79a4287551d3f76ca9919e77cc1adb94c",
         "references/entidades.md": "5d25f8c1f82bdad9418055a497691613039451baf6ae0b8020d7103a43011a66",
         "references/facturas.md": "38b13256196c5d27935f4aa6a430d7b22f33e77e7e4ee8c01e96b4e5bc8dcf80",
         "references/recibos.md": "f827b578194267895bac54d632a47ba452c304fa59c15630961734f8fdf9c27e",
         "references/resultados.md": "e90bc10bd046a62f1ff03314626c1039f4592bec3dc540469a0d860a880ff463",
         "references/sugerencias.md": "0f1db6fc29872dd73cecad8d7a1ae681dab8ef90e1043c6f8dcec4d431569cfa",
-        "references/recursos-humanos.md": "8b537e234fe9f51036e7ca19716c97389172c437840ebe801853e25f470a49f0"
+        "references/recursos-humanos.md": "8b537e234fe9f51036e7ca19716c97389172c437840ebe801853e25f470a49f0",
+        "references/insumos.md": "ad490f0af28b22d3cf9cea155d52d951040b1837c1223ad825a6a6966381e523",
+        "references/productos.md": "c75eeb32e35d5e1590636d670b56b04972f1110c6cf14210eadff5298e80d7a2"
       }
     }
   ]
