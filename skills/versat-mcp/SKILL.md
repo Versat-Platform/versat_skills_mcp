@@ -1,6 +1,6 @@
 ---
 name: versat-mcp
-description: "Consultar y operar entidades, facturas, recibos, recursos humanos y catálogos mediante las tools del MCP Versat; interpretar sus resultados y resolver problemas de acceso. Usar para tareas de negocio con Versat, no para desarrollo genérico del servidor."
+description: "Consultar y operar entidades, facturas, recibos, pedidos, pagarés, comisiones, productos, recursos humanos y catálogos mediante las tools del MCP Versat; interpretar sus resultados y resolver problemas de acceso. Usar para tareas de negocio con Versat, no para desarrollo genérico del servidor."
 ---
 
 # Versat MCP
@@ -16,6 +16,8 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 | Consultar o modificar clientes, proveedores y datos relacionados | [Entidades](references/entidades.md); `versat_consultar_entidad` para consultas de negocio |
 | Crear, duplicar, actualizar o procesar facturas | [Facturas](references/facturas.md); distingue financiera AF31, insumos AI71 y granos AG91 |
 | Crear, actualizar o procesar recibos y transacciones | [Recibos](references/recibos.md); AF51 y sus detalles |
+| Gestionar pedidos, cancelaciones, pagarés y provisiones de comisiones de insumos | [Documentos de insumos](references/insumos.md); AI11, AI15, AI81 y AI91 con detalles y altas completas |
+| Gestionar nombres comerciales, presentaciones, grupos, líneas, marcas, principios activos, materiales, insumos y precios | [Productos y catálogos](references/productos.md); OB10/OB16/OB32/OB61/OB65/OB88/OB89 y BP41/BP51/BP71 |
 | Consultar o mantener contratos de trabajo, hojas de pago y vacaciones | [Recursos humanos](references/recursos-humanos.md); AR05, AR11 con funcionarios/eventos y AR51 |
 | Consultar o mantener eventos, operaciones de hoja, cargos, profesiones, escalas, tipos de contrato o feriados | [Recursos humanos](references/recursos-humanos.md); OR11, OR31, OR41, OR51, OR61, OR62 y OR65, con sus detalles |
 | Preparar un borrador y sugerir datos desde antecedentes recientes | [Sugerencias históricas](references/sugerencias.md); `versat_preparar_registro` |
@@ -29,7 +31,7 @@ Lee solo la referencia necesaria para la tarea; combina referencias cuando el fl
 2. Resuelve los datos ya informados mediante búsquedas. Pide solo datos de negocio faltantes o una elección entre coincidencias razonables. Una autorización ya dada no exige otra confirmación para la misma acción.
 3. Antes de escribir, consulta el contrato de campos. Muchas tools de alta lo devuelven sin JSON; comprueba esa posibilidad en la descripción vigente. Resuelve IDs mediante catálogos, sin inventarlos ni pedirlos al usuario cuando puedas buscarlos.
 4. En AF31, AI71, AG91 o AF51, si faltan datos y ya conoces entidad y operación, usa `versat_preparar_registro` con el borrador parcial para obtener sugerencias verificadas. En caja AF51 usa entidad, Entrada/Salida y moneda; la factura vinculada conserva su operación. Revisa evidencias, grupos y pendientes, conserva los valores explícitos y resuelve las ambigüedades relevantes.
-5. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los registros con estado nacen en `Borrador` y no son consultables hasta aplicar: conserva cada ID confirmado para vincular detalles y subdetalles. Aplicar, desaplicar y anular usan tools de procesamiento; no apliques un registro incompleto para localizarlo.
+5. Envía un objeto JSON con los nombres exactos del contrato y una sola propiedad por campo. Para cabecera con detalles, prefiere la tool completa del recurso. Los documentos con campo Status nacen en `Borrador` y no son consultables hasta aplicar: conserva cada ID confirmado para vincular detalles y subdetalles. Aplicar, desaplicar y anular usan tools de procesamiento; no apliques un registro incompleto para localizarlo.
 6. Evalúa el resultado global y cualquier resultado parcial antes de continuar. Informa qué se creó, qué falta y el estado verificado.
 
 ## Decisiones que cambian el flujo
